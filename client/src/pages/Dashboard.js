@@ -1,10 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
+import FileUpload from '../components/Dashboard/FileUpload';
+import DeckCard from '../components/Dashboard/DeckCard';
 
 const Dashboard = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const [decks, setDecks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showUpload, setShowUpload] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -12,6 +18,38 @@ const Dashboard = () => {
       navigate('/login');
     }
   }, [isAuthenticated, navigate]);
+
+  // Fetch decks on mount
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchDecks();
+    }
+  }, [isAuthenticated]);
+
+  const fetchDecks = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/decks', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setDecks(response.data.decks);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching decks:', error);
+      setLoading(false);
+    }
+  };
+
+  const handleUploadSuccess = (newDeck) => {
+    setDecks([newDeck, ...decks]);
+    setShowUpload(false);
+    alert('✅ Deck created successfully!');
+  };
+
+  const handleDeleteDeck = (deckId) => {
+    setDecks(decks.filter(deck => deck._id !== deckId));
+  };
 
   if (!user) {
     return <div>Loading...</div>;
@@ -41,10 +79,29 @@ const Dashboard = () => {
 
       {/* Dashboard Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
-          <p className="mt-2 text-gray-600">Manage your study materials and track your progress</p>
+        {/* Header with Upload Button */}
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
+            <p className="mt-2 text-gray-600">Manage your study materials and track your progress</p>
+          </div>
+          <button
+            onClick={() => setShowUpload(!showUpload)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            {showUpload ? 'Close' : 'Upload Material'}
+          </button>
         </div>
+
+        {/* File Upload Section */}
+        {showUpload && (
+          <div className="mb-8">
+            <FileUpload onUploadSuccess={handleUploadSuccess} />
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -57,7 +114,7 @@ const Dashboard = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Decks</p>
-                <p className="text-2xl font-semibold text-gray-900">0</p>
+                <p className="text-2xl font-semibold text-gray-900">{decks.length}</p>
               </div>
             </div>
           </div>
@@ -70,8 +127,10 @@ const Dashboard = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Cards Mastered</p>
-                <p className="text-2xl font-semibold text-gray-900">0</p>
+                <p className="text-sm font-medium text-gray-600">Total Cards</p>
+                <p className="text-2xl font-semibold text-gray-900">
+                  {decks.reduce((sum, deck) => sum + (deck.totalCards || 0), 0)}
+                </p>
               </div>
             </div>
           </div>
@@ -105,24 +164,49 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Empty State */}
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <svg className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900">No study decks yet</h3>
-          <p className="mt-2 text-sm text-gray-500">
-            Get started by uploading your first document or creating a new deck.
-          </p>
-          <div className="mt-6">
-            <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-              <svg className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Create New Deck
-            </button>
+        {/* Decks Grid */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-gray-600">Loading decks...</p>
           </div>
-        </div>
+        ) : decks.length > 0 ? (
+          <>
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Study Decks</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {decks.map((deck) => (
+                <DeckCard
+                  key={deck._id}
+                  deck={deck}
+                  onDelete={handleDeleteDeck}
+                  onGenerateFlashcards={() => fetchDecks()}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          /* Empty State */
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <svg className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <h3 className="mt-4 text-lg font-medium text-gray-900">No study decks yet</h3>
+            <p className="mt-2 text-sm text-gray-500">
+              Get started by uploading your first document or creating a new deck.
+            </p>
+            <div className="mt-6">
+              <button
+                onClick={() => setShowUpload(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+              >
+                <svg className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Upload Study Material
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
