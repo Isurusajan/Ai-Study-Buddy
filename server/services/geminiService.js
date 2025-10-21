@@ -7,7 +7,12 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+// Function to get model
+function getModel() {
+  // Use gemini-pro (latest package supports this)
+  return genAI.getGenerativeModel({ model: 'gemini-pro' });
+}
 
 /**
  * Generate flashcards from text
@@ -47,6 +52,7 @@ Return ONLY a valid JSON array in this exact format (no markdown, no extra text)
 
 Important: Return ONLY the JSON array, nothing else.`;
 
+    const model = getModel();
     const result = await model.generateContent(prompt);
     const response = result.response.text();
 
@@ -85,6 +91,7 @@ ${limitedText}
 
 Return only the bullet points, no other text.`;
 
+    const model = getModel();
     const result = await model.generateContent(prompt);
     const summary = result.response.text();
 
@@ -125,6 +132,7 @@ Question: ${question}
 
 Provide a clear, accurate answer based on the study material.`;
 
+    const model = getModel();
     const result = await model.generateContent(prompt);
     const answer = result.response.text();
 

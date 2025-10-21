@@ -6,7 +6,12 @@ const {
   createDeck,
   getDecks,
   getDeck,
-  deleteDeck
+  deleteDeck,
+  generateDeckSummary,
+  generateQuiz,
+  downloadSummary,
+  generateShortAnswerQuestions,
+  generateLongAnswerQuestions
 } = require('../controllers/deckController');
 
 /**
@@ -25,5 +30,20 @@ router.get('/:id', protect, getDeck);
 
 // Delete deck
 router.delete('/:id', protect, deleteDeck);
+
+// Generate summary for deck (with level: brief, medium, detailed)
+router.post('/:id/summary', protect, generateDeckSummary);
+
+// Download summary as file
+router.get('/:id/summary/download', protect, downloadSummary);
+
+// Generate MCQ quiz (with count and difficulty: easy, medium, hard)
+router.post('/:id/quiz', protect, generateQuiz);
+
+// Generate short answer questions (with count and difficulty)
+router.post('/:id/short-answer', protect, generateShortAnswerQuestions);
+
+// Generate long answer/essay questions (with count and difficulty)
+router.post('/:id/long-answer', protect, generateLongAnswerQuestions);
 
 module.exports = router;

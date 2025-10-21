@@ -62,10 +62,23 @@ exports.generateFlashcardsForDeck = async (req, res) => {
 
   } catch (error) {
     console.error('Generate flashcards error:', error);
+
+    // Provide helpful error message to user
+    let userMessage = 'Failed to generate flashcards';
+
+    if (error.message.includes('API key') || error.message.includes('not accessible')) {
+      userMessage = '❌ Gemini API Error: ' + error.message;
+    } else if (error.message.includes('timeout')) {
+      userMessage = 'Request timeout. The AI service took too long to respond. Please try again.';
+    } else if (error.message.includes('JSON')) {
+      userMessage = 'AI returned invalid response. Please try again.';
+    }
+
     res.status(500).json({
       success: false,
-      message: 'Failed to generate flashcards',
-      error: error.message
+      message: userMessage,
+      error: error.message,
+      helpUrl: 'See server/GEMINI_API_KEY_SETUP.md for setup instructions'
     });
   }
 };

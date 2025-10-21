@@ -2,7 +2,7 @@ const Deck = require('../models/Deck');
 const Flashcard = require('../models/Flashcard');
 const cloudinary = require('../config/cloudinary');
 const { extractText } = require('../services/pdfService');
-const { generateFlashcards, generateSummary } = require('../services/geminiService');
+const { generateFlashcards, generateSummary, generateMCQ, generateShortAnswer, generateLongAnswer } = require('../services/geminiService');
 
 /**
  * @desc    Create a new deck with file upload
@@ -52,10 +52,16 @@ exports.createDeck = async (req, res) => {
     const extractedText = await extractText(file.buffer, file.mimetype);
     console.log(`✅ Extracted ${extractedText.length} characters`);
 
-    // Step 3: Generate summary using AI
-    console.log('🤖 Generating summary...');
-    const summary = await generateSummary(extractedText);
-    console.log('✅ Summary generated');
+    // Step 3: Generate summary using AI (optional - skip if fails)
+    let summary = null;
+    try {
+      console.log('🤖 Generating summary...');
+      summary = await generateSummary(extractedText);
+      console.log('✅ Summary generated');
+    } catch (summaryError) {
+      console.log('⚠️ Summary generation failed, continuing without it:', summaryError.message);
+      summary = 'Summary generation unavailable';
+    }
 
     // Step 4: Create deck in database
     const deck = await Deck.create({
@@ -76,11 +82,12 @@ exports.createDeck = async (req, res) => {
       success: true,
       message: 'Deck created successfully',
       deck: {
-        id: deck._id,
+        _id: deck._id,
         title: deck.title,
         subject: deck.subject,
         description: deck.description,
         summary: deck.summary,
+        totalCards: deck.totalCards || 0,
         sourceFile: {
           filename: deck.sourceFile.filename,
           url: deck.sourceFile.url
@@ -206,6 +213,263 @@ exports.deleteDeck = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete deck',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Generate summary for a deck with customizable detail level
+ * @route   POST /api/decks/:id/summary
+ * @access  Private
+ */
+exports.generateDeckSummary = async (req, res) => {
+  try {
+    const { level = 'medium' } = req.body; // brief, medium, detailed
+
+    const deck = await Deck.findOne({
+      _id: req.params.id,
+      userId: req.user.id
+    }).select('+extractedText');
+
+    if (!deck) {
+      return res.status(404).json({
+        success: false,
+        message: 'Deck not found'
+      });
+    }
+
+    if (!deck.extractedText) {
+      return res.status(400).json({
+        success: false,
+        message: 'No extracted text available for this deck'
+      });
+    }
+
+    console.log(`📝 Generating ${level} summary for deck: ${deck.title}`);
+
+    const summary = await generateSummary(deck.extractedText, level);
+
+    // Update deck's summary (save the medium version by default)
+    if (level === 'medium') {
+      deck.summary = summary;
+      await deck.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      summary,
+      level,
+      deckTitle: deck.title
+    });
+
+  } catch (error) {
+    console.error('Generate summary error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate summary',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Generate MCQ quiz for a deck
+ * @route   POST /api/decks/:id/quiz
+ * @access  Private
+ */
+exports.generateQuiz = async (req, res) => {
+  try {
+    const { count = 10, difficulty = 'medium' } = req.body;
+
+    const deck = await Deck.findOne({
+      _id: req.params.id,
+      userId: req.user.id
+    }).select('+extractedText');
+
+    if (!deck) {
+      return res.status(404).json({
+        success: false,
+        message: 'Deck not found'
+      });
+    }
+
+    if (!deck.extractedText) {
+      return res.status(400).json({
+        success: false,
+        message: 'No extracted text available for this deck'
+      });
+    }
+
+    console.log(`📝 Generating ${count} ${difficulty} MCQ questions for deck: ${deck.title}`);
+
+    const questions = await generateMCQ(deck.extractedText, parseInt(count), difficulty);
+
+    res.status(200).json({
+      success: true,
+      questions,
+      count: questions.length,
+      difficulty,
+      deckTitle: deck.title
+    });
+
+  } catch (error) {
+    console.error('Generate quiz error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate quiz',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Download summary as a text file
+ * @route   GET /api/decks/:id/summary/download
+ * @access  Private
+ */
+exports.downloadSummary = async (req, res) => {
+  try {
+    const { level = 'medium' } = req.query;
+
+    const deck = await Deck.findOne({
+      _id: req.params.id,
+      userId: req.user.id
+    }).select('+extractedText');
+
+    if (!deck) {
+      return res.status(404).json({
+        success: false,
+        message: 'Deck not found'
+      });
+    }
+
+    if (!deck.extractedText) {
+      return res.status(400).json({
+        success: false,
+        message: 'No extracted text available for this deck'
+      });
+    }
+
+    console.log(`📥 Generating ${level} summary for download: ${deck.title}`);
+
+    const summary = await generateSummary(deck.extractedText, level);
+
+    // Create filename
+    const filename = `${deck.title.replace(/[^a-z0-9]/gi, '_')}_summary_${level}.txt`;
+
+    // Set headers for file download
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+    // Send summary as file
+    res.send(summary);
+
+  } catch (error) {
+    console.error('Download summary error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to download summary',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Generate short answer questions for a deck
+ * @route   POST /api/decks/:id/short-answer
+ * @access  Private
+ */
+exports.generateShortAnswerQuestions = async (req, res) => {
+  try {
+    const { count = 10, difficulty = 'medium' } = req.body;
+
+    const deck = await Deck.findOne({
+      _id: req.params.id,
+      userId: req.user.id
+    }).select('+extractedText');
+
+    if (!deck) {
+      return res.status(404).json({
+        success: false,
+        message: 'Deck not found'
+      });
+    }
+
+    if (!deck.extractedText) {
+      return res.status(400).json({
+        success: false,
+        message: 'No extracted text available for this deck'
+      });
+    }
+
+    console.log(`📝 Generating ${count} ${difficulty} short answer questions for deck: ${deck.title}`);
+
+    const questions = await generateShortAnswer(deck.extractedText, parseInt(count), difficulty);
+
+    res.status(200).json({
+      success: true,
+      questions,
+      count: questions.length,
+      difficulty,
+      deckTitle: deck.title
+    });
+
+  } catch (error) {
+    console.error('Generate short answer error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate short answer questions',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Generate long answer/essay questions for a deck
+ * @route   POST /api/decks/:id/long-answer
+ * @access  Private
+ */
+exports.generateLongAnswerQuestions = async (req, res) => {
+  try {
+    const { count = 5, difficulty = 'medium' } = req.body;
+
+    const deck = await Deck.findOne({
+      _id: req.params.id,
+      userId: req.user.id
+    }).select('+extractedText');
+
+    if (!deck) {
+      return res.status(404).json({
+        success: false,
+        message: 'Deck not found'
+      });
+    }
+
+    if (!deck.extractedText) {
+      return res.status(400).json({
+        success: false,
+        message: 'No extracted text available for this deck'
+      });
+    }
+
+    console.log(`📝 Generating ${count} ${difficulty} long answer questions for deck: ${deck.title}`);
+
+    const questions = await generateLongAnswer(deck.extractedText, parseInt(count), difficulty);
+
+    res.status(200).json({
+      success: true,
+      questions,
+      count: questions.length,
+      difficulty,
+      deckTitle: deck.title
+    });
+
+  } catch (error) {
+    console.error('Generate long answer error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate long answer questions',
       error: error.message
     });
   }
