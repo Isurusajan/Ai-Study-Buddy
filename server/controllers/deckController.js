@@ -1,8 +1,7 @@
 const Deck = require('../models/Deck');
-const Flashcard = require('../models/Flashcard');
 const cloudinary = require('../config/cloudinary');
 const { extractText } = require('../services/pdfService');
-const { generateFlashcards, generateSummary, generateMCQ, generateShortAnswer, generateLongAnswer } = require('../services/geminiService');
+const { generateSummary, generateMCQ, generateShortAnswer, generateLongAnswer } = require('../services/geminiService');
 
 /**
  * @desc    Create a new deck with file upload
@@ -35,7 +34,9 @@ exports.createDeck = async (req, res) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: 'study-buddy',
-          resource_type: 'auto'
+          resource_type: 'auto',
+          access_type: 'anonymous', // Make files publicly accessible
+          type: 'upload'
         },
         (error, result) => {
           if (error) reject(error);
@@ -87,7 +88,6 @@ exports.createDeck = async (req, res) => {
         subject: deck.subject,
         description: deck.description,
         summary: deck.summary,
-        totalCards: deck.totalCards || 0,
         sourceFile: {
           filename: deck.sourceFile.filename,
           url: deck.sourceFile.url
@@ -152,15 +152,9 @@ exports.getDeck = async (req, res) => {
       });
     }
 
-    // Get flashcard count
-    const flashcardCount = await Flashcard.countDocuments({ deckId: deck._id });
-
     res.status(200).json({
       success: true,
-      deck: {
-        ...deck.toObject(),
-        flashcardCount
-      }
+      deck: deck.toObject()
     });
 
   } catch (error) {
@@ -196,9 +190,6 @@ exports.deleteDeck = async (req, res) => {
     if (deck.sourceFile.publicId) {
       await cloudinary.uploader.destroy(deck.sourceFile.publicId);
     }
-
-    // Delete all flashcards associated with this deck
-    await Flashcard.deleteMany({ deckId: deck._id });
 
     // Delete deck
     await deck.deleteOne();
@@ -470,6 +461,65 @@ exports.generateLongAnswerQuestions = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to generate long answer questions',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Ask a question about the deck content
+ * @route   POST /api/decks/:id/ask
+ * @access  Private
+ */
+exports.askQuestion = async (req, res) => {
+  try {
+    const { question, level = 'medium' } = req.body;
+
+    if (!question || question.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a question'
+      });
+    }
+
+    const deck = await Deck.findOne({
+      _id: req.params.id,
+      userId: req.user.id
+    }).select('+extractedText');
+
+    if (!deck) {
+      return res.status(404).json({
+        success: false,
+        message: 'Deck not found'
+      });
+    }
+
+    if (!deck.extractedText) {
+      return res.status(400).json({
+        success: false,
+        message: 'No extracted text available for this deck'
+      });
+    }
+
+    console.log(`💬 Answering question for deck: ${deck.title}`);
+    console.log(`   Question: ${question}`);
+
+    const { answerQuestion } = require('../services/geminiService');
+    const answer = await answerQuestion(deck.extractedText, question, level);
+
+    res.status(200).json({
+      success: true,
+      question,
+      answer,
+      level,
+      deckTitle: deck.title
+    });
+
+  } catch (error) {
+    console.error('Ask question error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to answer question',
       error: error.message
     });
   }

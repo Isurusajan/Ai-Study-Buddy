@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { InlineSpinner } from '../components/Loading/LoadingSpinner';
 
 const ShortAnswerPractice = () => {
   const { deckId } = useParams();
@@ -83,7 +84,7 @@ const ShortAnswerPractice = () => {
 
           <div className="bg-white rounded-lg shadow-md p-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Short Answer Practice
+              Short Questions Practice
             </h1>
             <p className="text-gray-600 mb-6">
               {deck ? `From: ${deck.title}` : 'Loading...'}
@@ -138,9 +139,16 @@ const ShortAnswerPractice = () => {
               <button
                 onClick={generateQuestions}
                 disabled={loading}
-                className="w-full px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium"
+                className="w-full px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium flex items-center justify-center gap-2"
               >
-                {loading ? 'Generating Questions...' : 'Generate Questions'}
+                {loading ? (
+                  <>
+                    <InlineSpinner size={20} color="#ffffff" />
+                    Generating Questions...
+                  </>
+                ) : (
+                  'Generate Questions'
+                )}
               </button>
             </div>
           </div>
@@ -166,7 +174,7 @@ const ShortAnswerPractice = () => {
           </button>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Short Answer Practice</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Short Questions Practice</h1>
             <p className="text-gray-600 mb-4">
               {deck?.title} • {questions.length} Questions • {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Difficulty
             </p>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import LoadingSpinner from '../components/Loading/LoadingSpinner';
 
 const Study = () => {
   const { deckId } = useParams();
@@ -93,14 +94,7 @@ const Study = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Loading flashcards...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen message="Loading flashcards..." />;
   }
 
   if (!flashcards || flashcards.length === 0) {

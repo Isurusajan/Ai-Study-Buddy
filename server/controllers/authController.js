@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { sendTokenResponse } = require('../utils/helpers');
+const { sendRegistrationEmail } = require('../services/emailService');
 
 /**
  * @desc    Register a new user
@@ -32,6 +33,11 @@ exports.register = async (req, res) => {
       name,
       email,
       password
+    });
+
+    // Send registration confirmation email (don't wait for it)
+    sendRegistrationEmail(email, name).catch(err => {
+      console.error('Warning: Failed to send registration email:', err.message);
     });
 
     // Send response with JWT token

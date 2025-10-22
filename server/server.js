@@ -37,9 +37,6 @@ app.use('/api/auth', require('./routes/auth'));
 // Deck routes
 app.use('/api/decks', require('./routes/decks'));
 
-// Flashcard routes
-app.use('/api/flashcards', require('./routes/flashcards'));
-
 // Health check route
 app.get('/', (req, res) => {
   res.json({

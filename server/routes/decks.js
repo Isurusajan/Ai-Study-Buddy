@@ -11,7 +11,8 @@ const {
   generateQuiz,
   downloadSummary,
   generateShortAnswerQuestions,
-  generateLongAnswerQuestions
+  generateLongAnswerQuestions,
+  askQuestion
 } = require('../controllers/deckController');
 
 /**
@@ -45,5 +46,8 @@ router.post('/:id/short-answer', protect, generateShortAnswerQuestions);
 
 // Generate long answer/essay questions (with count and difficulty)
 router.post('/:id/long-answer', protect, generateLongAnswerQuestions);
+
+// Ask a question about the deck content
+router.post('/:id/ask', protect, askQuestion);
 
 module.exports = router;

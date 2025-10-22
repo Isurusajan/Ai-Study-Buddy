@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { InlineSpinner } from '../components/Loading/LoadingSpinner';
 
 const Quiz = () => {
   const { deckId } = useParams();
@@ -51,8 +52,11 @@ const Quiz = () => {
       setSelectedAnswers({});
       setShowResults(false);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to generate quiz');
-      console.error(err);
+      console.error('Generate quiz error:', err);
+      const errorMessage = err.response?.data?.message ||
+                          err.response?.data?.error ||
+                          'Failed to generate quiz. The document content might be too complex or contain restricted content. Please try with a different document or fewer questions.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -177,9 +181,16 @@ const Quiz = () => {
               <button
                 onClick={generateQuiz}
                 disabled={loading}
-                className="w-full px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium"
+                className="w-full px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium flex items-center justify-center gap-2"
               >
-                {loading ? 'Generating Quiz...' : 'Start Quiz'}
+                {loading ? (
+                  <>
+                    <InlineSpinner size={20} color="#ffffff" />
+                    Generating Quiz...
+                  </>
+                ) : (
+                  'Start Quiz'
+                )}
               </button>
             </div>
           </div>

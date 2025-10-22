@@ -42,10 +42,6 @@ const deckSchema = new mongoose.Schema({
   },
   lastStudied: {
     type: Date
-  },
-  totalCards: {
-    type: Number,
-    default: 0
   }
 }, {
   timestamps: true

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import FileUpload from '../components/Dashboard/FileUpload';
 import DeckCard from '../components/Dashboard/DeckCard';
+import { FullPageLoader } from '../components/Loading/LoadingSpinner';
 
 const Dashboard = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -51,8 +52,8 @@ const Dashboard = () => {
     setDecks(decks.filter(deck => deck._id !== deckId));
   };
 
-  if (!user) {
-    return <div>Loading...</div>;
+  if (!user || loading) {
+    return <FullPageLoader message="Loading your dashboard..." />;
   }
 
   return (
@@ -123,13 +124,13 @@ const Dashboard = () => {
             <div className="flex items-center">
               <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
                 <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Cards</p>
+                <p className="text-sm font-medium text-gray-600">Total Quizzes</p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {decks.reduce((sum, deck) => sum + (deck.totalCards || 0), 0)}
+                  {decks.length * 3}
                 </p>
               </div>
             </div>

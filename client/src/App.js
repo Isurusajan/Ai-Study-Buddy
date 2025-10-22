@@ -10,6 +10,7 @@ import Quiz from './pages/Quiz';
 import ViewPDF from './pages/ViewPDF';
 import ShortAnswerPractice from './pages/ShortAnswerPractice';
 import LongAnswerPractice from './pages/LongAnswerPractice';
+import AskQuestion from './pages/AskQuestion';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/quiz/:deckId" element={<Quiz />} />
             <Route path="/short-answer/:deckId" element={<ShortAnswerPractice />} />
             <Route path="/long-answer/:deckId" element={<LongAnswerPractice />} />
+            <Route path="/ask/:deckId" element={<AskQuestion />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>

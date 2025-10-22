@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import LoadingSpinner, { InlineSpinner } from '../components/Loading/LoadingSpinner';
 
 const PDFSummary = () => {
   const { deckId } = useParams();
@@ -106,9 +107,9 @@ const PDFSummary = () => {
                 onChange={(e) => setLevel(e.target.value)}
                 className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
-                <option value="brief">Brief (3-5 bullet points)</option>
-                <option value="medium">Medium (8-12 bullet points)</option>
-                <option value="detailed">Detailed (comprehensive)</option>
+                <option value="brief">Brief (1-2 pages)</option>
+                <option value="medium">Medium (3-5 pages)</option>
+                <option value="detailed">Detailed (6-10 pages)</option>
               </select>
             </div>
 
@@ -116,9 +117,16 @@ const PDFSummary = () => {
               <button
                 onClick={generateSummary}
                 disabled={loading}
-                className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center gap-2"
               >
-                {loading ? 'Generating...' : 'Generate Summary'}
+                {loading ? (
+                  <>
+                    <InlineSpinner size={20} color="#ffffff" />
+                    Generating...
+                  </>
+                ) : (
+                  'Generate Summary'
+                )}
               </button>
 
               {summary && (
@@ -192,9 +200,8 @@ const PDFSummary = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Generating summary... This may take a few moments.</p>
+          <div className="bg-white rounded-lg shadow-md p-12">
+            <LoadingSpinner message="Generating summary... This may take a few moments." />
           </div>
         )}
       </div>
