@@ -4,10 +4,12 @@ frontend:
   phases:
     preBuild:
       commands:
-        - cd client && npm install
+        - echo "Installing dependencies..."
+        - npm --prefix client install
     build:
       commands:
-        - cd client && npm run build
+        - echo "Building React app..."
+        - npm --prefix client run build
   artifacts:
     baseDirectory: client/build
     files:
@@ -15,3 +17,4 @@ frontend:
   cache:
     paths:
       - client/node_modules/**/*
+
