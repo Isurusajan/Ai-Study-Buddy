@@ -1,7 +1,9 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const http = require('http');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const socketIO = require('socket.io');
 const connectDB = require('./config/db');
 
@@ -11,10 +13,23 @@ dotenv.config();
 // Initialize Express app
 const app = express();
 
-// Create HTTP server (not HTTPS - browsers reject self-signed certs for XHR)
-// For production, use a proper SSL certificate or proxy through CloudFront
-const server = http.createServer(app);
-console.log('✅ Using HTTP server (suitable for AWS Free Tier)');
+// Create HTTPS server with self-signed certificates
+const certPath = path.join(__dirname, 'certs', 'cert.pem');
+const keyPath = path.join(__dirname, 'certs', 'key.pem');
+
+let server;
+if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+  const options = {
+    cert: fs.readFileSync(certPath),
+    key: fs.readFileSync(keyPath)
+  };
+  server = https.createServer(options, app);
+  console.log('🔒 Using HTTPS server with self-signed certificates');
+} else {
+  const http = require('http');
+  server = http.createServer(app);
+  console.log('⚠️ HTTPS certificates not found, using HTTP');
+}
 
 // Initialize Socket.io with CORS configuration
 const io = socketIO(server, {
@@ -122,11 +137,12 @@ const PORT = process.env.PORT || 5000;
 require('./websockets/battleSocket')(io);
 
 server.listen(PORT, () => {
+  const protocol = fs.existsSync(certPath) && fs.existsSync(keyPath) ? 'https' : 'http';
   console.log('=================================');
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌐 API URL: http://localhost:${PORT}`);
-  console.log(`🔌 WebSocket: ws://localhost:${PORT}`);
+  console.log(`🌐 API URL: ${protocol}://localhost:${PORT}`);
+  console.log(`🔌 WebSocket: ${protocol === 'https' ? 'wss' : 'ws'}://localhost:${PORT}`);
   console.log('=================================');
 });
 
