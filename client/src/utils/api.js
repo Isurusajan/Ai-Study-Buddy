@@ -2,13 +2,15 @@ import axios from 'axios';
 
 /**
  * Axios instance with base configuration
- * Use environment variable for API URL (set in .env files)
- * In production: REACT_APP_API_URL from client/.env
- * In development: defaults to http://localhost:5000
+ * In production (Amplify): Uses relative URLs, which are proxied through Amplify to the backend
+ * In development: Uses http://localhost:5000 or the REACT_APP_API_URL from .env
  */
-const apiBaseURL = process.env.REACT_APP_API_URL 
-  ? `${process.env.REACT_APP_API_URL}/api`
-  : 'http://localhost:5000/api';
+let apiBaseURL = '/api';
+
+// Use full URL if REACT_APP_API_URL is explicitly set
+if (process.env.REACT_APP_API_URL) {
+  apiBaseURL = `${process.env.REACT_APP_API_URL}/api`;
+}
 
 const api = axios.create({
   baseURL: apiBaseURL,

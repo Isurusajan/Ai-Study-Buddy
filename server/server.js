@@ -1,9 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
+const http = require('http');
 const socketIO = require('socket.io');
 const connectDB = require('./config/db');
 
@@ -13,30 +11,15 @@ dotenv.config();
 // Initialize Express app
 const app = express();
 
-// Load SSL certificates for production HTTPS
-let server;
-const certPath = path.join(__dirname, 'certs', 'cert.pem');
-const keyPath = path.join(__dirname, 'certs', 'key.pem');
-
-if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
-  // Use HTTPS with SSL certificates
-  const options = {
-    cert: fs.readFileSync(certPath),
-    key: fs.readFileSync(keyPath)
-  };
-  server = https.createServer(options, app);
-  console.log('🔒 Using HTTPS with SSL certificates');
-} else {
-  // Fallback to HTTP if certificates not found
-  const http = require('http');
-  server = http.createServer(app);
-  console.log('⚠️ SSL certificates not found, using HTTP');
-}
+// Create HTTP server (not HTTPS - browsers reject self-signed certs for XHR)
+// For production, use a proper SSL certificate or proxy through CloudFront
+const server = http.createServer(app);
+console.log('✅ Using HTTP server (suitable for AWS Free Tier)');
 
 // Initialize Socket.io with CORS configuration
 const io = socketIO(server, {
   cors: {
-    origin: true, // Accept all origins in development
+    origin: 'https://main.d1dg86wxbzr6zt.amplifyapp.com',
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true
   },
@@ -53,7 +36,26 @@ connectDB();
 
 // Enable CORS (allows frontend to make requests from different domain)
 app.use(cors({
-  origin: true,
+  origin: function(origin, callback) {
+    // Allow specific origins
+    const allowedOrigins = [
+      'https://main.d1dg86wxbzr6zt.amplifyapp.com',
+      'http://localhost:3000',
+      'http://localhost:5000',
+      'https://localhost:5000'
+    ];
+    
+    // Allow requests with no origin (like mobile apps)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -120,12 +122,11 @@ const PORT = process.env.PORT || 5000;
 require('./websockets/battleSocket')(io);
 
 server.listen(PORT, () => {
-  const protocol = fs.existsSync(certPath) && fs.existsSync(keyPath) ? 'https' : 'http';
   console.log('=================================');
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌐 API URL: ${protocol}://localhost:${PORT}`);
-  console.log(`🔌 WebSocket: ${protocol === 'https' ? 'wss' : 'ws'}://localhost:${PORT}`);
+  console.log(`🌐 API URL: http://localhost:${PORT}`);
+  console.log(`🔌 WebSocket: ws://localhost:${PORT}`);
   console.log('=================================');
 });
 
