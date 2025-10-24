@@ -6,6 +6,7 @@ function LobbyScreen({ roomCode, players, isHost, onStart, onCreateRoom, onSetti
   const [showSettings, setShowSettings] = useState(false);
   const [difficulty, setDifficulty] = useState('medium');
   const [timePerQuestion, setTimePerQuestion] = useState(15);
+  const [questionCount, setQuestionCount] = useState(10);
   
   const copyRoomCode = () => {
     navigator.clipboard.writeText(roomCode);
@@ -22,7 +23,7 @@ function LobbyScreen({ roomCode, players, isHost, onStart, onCreateRoom, onSetti
   
   const handleSaveSettings = () => {
     if (onSettingsChange) {
-      onSettingsChange({ difficulty, timePerQuestion });
+      onSettingsChange({ difficulty, timePerQuestion, questionCount });
     }
     setShowSettings(false);
     toast.success('✅ Settings saved!');
@@ -86,6 +87,17 @@ function LobbyScreen({ roomCode, players, isHost, onStart, onCreateRoom, onSetti
                 </select>
               </div>
               <div className="setting-item">
+                <label className="setting-label">Questions</label>
+                <input 
+                  type="number"
+                  className="setting-input"
+                  value={questionCount}
+                  onChange={(e) => setQuestionCount(parseInt(e.target.value))}
+                  min="5"
+                  max="20"
+                />
+              </div>
+              <div className="setting-item">
                 <label className="setting-label">Time/Question (sec)</label>
                 <input 
                   type="number"
@@ -111,7 +123,7 @@ function LobbyScreen({ roomCode, players, isHost, onStart, onCreateRoom, onSetti
               </div>
               <div className="setting-item">
                 <span className="setting-label">Questions</span>
-                <span className="setting-value">10</span>
+                <span className="setting-value">{questionCount}</span>
               </div>
               <div className="setting-item">
                 <span className="setting-label">Time/Question</span>

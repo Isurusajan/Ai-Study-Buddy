@@ -9,7 +9,6 @@ const battleRoomSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    index: true,
     uppercase: true
   },
   
@@ -106,8 +105,13 @@ const battleRoomSchema = new mongoose.Schema({
     timePerQuestion: {
       type: Number,
       default: 15, // seconds
-      min: 10,
+      min: 5,
       max: 60
+    },
+    difficulty: {
+      type: String,
+      enum: ['easy', 'medium', 'hard'],
+      default: 'medium'
     },
     allowPowerUps: {
       type: Boolean,
@@ -150,6 +154,5 @@ const battleRoomSchema = new mongoose.Schema({
 battleRoomSchema.index({ hostId: 1, createdAt: -1 });
 battleRoomSchema.index({ 'players.userId': 1 });
 battleRoomSchema.index({ status: 1 });
-battleRoomSchema.index({ roomCode: 1 });
 
 module.exports = mongoose.model('BattleRoom', battleRoomSchema);

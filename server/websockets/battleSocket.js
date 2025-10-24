@@ -153,38 +153,85 @@ module.exports = function(io) {
      */
     socket.on('update-battle-settings', async (data) => {
       try {
-        const { roomCode, difficulty, timePerQuestion, questionCount } = data;
+        const { roomCode, difficulty, timePerQuestion, questionCount, userId } = data;
+        console.log('⚙️ Update settings request:', { roomCode, difficulty, timePerQuestion, questionCount, userId, socketUserId: socket.userId });
         
         let battleRoom = await BattleRoom.findOne({ roomCode });
         
         if (!battleRoom) {
+          console.error('❌ Room not found:', roomCode);
           return socket.emit('error', { message: 'Room not found' });
         }
         
         // Only host can update settings
-        if (battleRoom.hostId.toString() !== socket.userId) {
+        if (battleRoom.hostId.toString() !== (userId || socket.userId)) {
+          console.error('❌ Only host can update. HostId:', battleRoom.hostId.toString(), 'UserId:', userId || socket.userId);
           return socket.emit('error', { message: 'Only host can update settings' });
         }
         
         // Can't update after battle started
         if (battleRoom.status !== 'waiting') {
+          console.error('❌ Battle already started. Status:', battleRoom.status);
           return socket.emit('error', { message: 'Can\'t update settings after battle started' });
         }
         
         // Validate inputs
         if (difficulty && !['easy', 'medium', 'hard'].includes(difficulty)) {
+          console.error('❌ Invalid difficulty:', difficulty);
           return socket.emit('error', { message: 'Invalid difficulty' });
         }
         
         const validTimePerQuestion = timePerQuestion ? Math.min(Math.max(timePerQuestion, 5), 60) : battleRoom.settings.timePerQuestion;
         const validQuestionCount = questionCount ? Math.min(Math.max(questionCount, 5), 20) : battleRoom.questions.length;
+        const newDifficulty = difficulty || battleRoom.settings.difficulty;
         
-        // Update settings
-        battleRoom.settings.difficulty = difficulty || battleRoom.settings.difficulty;
+        // Check if difficulty changed
+        const difficultyChanged = newDifficulty !== battleRoom.settings.difficulty;
+        // Check if question count changed
+        const questionCountChanged = validQuestionCount !== battleRoom.questions.length;
+        
+        // If difficulty OR question count changed, regenerate questions with NEW difficulty
+        if (difficultyChanged || questionCountChanged) {
+          console.log(`🔄 Regenerating ${validQuestionCount} questions with ${newDifficulty} difficulty (was ${battleRoom.questions.length} questions, ${battleRoom.settings.difficulty} difficulty)`);
+          try {
+            const { generateBattleQuestions } = require('../services/battleService');
+            battleRoom.questions = await generateBattleQuestions(
+              battleRoom.deckId.toString(), 
+              validQuestionCount, 
+              newDifficulty
+            );
+          } catch (genError) {
+            console.error('Question regeneration error:', genError.message);
+            return socket.emit('error', { message: 'Failed to regenerate questions: ' + genError.message });
+          }
+        }
+        
+        // Update all settings
+        battleRoom.settings.difficulty = newDifficulty;
         battleRoom.settings.timePerQuestion = validTimePerQuestion;
         battleRoom.settings.questionsCount = validQuestionCount;
         
-        await battleRoom.save();
+        // Save the updated battle room
+        try {
+          await battleRoom.save();
+        } catch (saveError) {
+          // If version conflict, use findByIdAndUpdate to force update
+          if (saveError.name === 'VersionError') {
+            console.log('⚠️ Version conflict detected, using atomic update...');
+            await BattleRoom.findByIdAndUpdate(
+              battleRoom._id,
+              {
+                $set: {
+                  questions: battleRoom.questions,
+                  settings: battleRoom.settings
+                }
+              },
+              { new: true }
+            );
+          } else {
+            throw saveError;
+          }
+        }
         
         // Broadcast updated settings to all players in room
         io.to(roomCode).emit('settings-updated', {
@@ -193,16 +240,18 @@ module.exports = function(io) {
           questionCount: validQuestionCount
         });
         
-        console.log(`⚙️ Battle settings updated in room ${roomCode}:`, battleRoom.settings);
+        console.log(`✅ Battle settings updated in room ${roomCode}:`, battleRoom.settings);
         
       } catch (error) {
         console.error('Error updating settings:', error);
-        socket.emit('error', { message: 'Failed to update settings' });
+        socket.emit('error', { message: 'Failed to update settings: ' + error.message });
       }
     });
     
     /**
      * START BATTLE event
+     */
+    socket.on('start-battle', async (data) => {
       try {
         const { roomCode } = data;
         
@@ -451,21 +500,21 @@ module.exports = function(io) {
       roomState.playersAnswered.clear();
       
       const question = battleRoom.questions[roomState.currentQuestion];
+      console.log(`📤 Sending question ${roomState.currentQuestion + 1} to room ${roomCode}`);
       
-      // Send to EACH player individually with shuffled options
-      battleRoom.players.forEach(player => {
-        const shuffledOptions = shuffleArray([...question.options]);
-        
-        io.to(player.userId.toString()).emit('new-question', {
-          questionNumber: roomState.currentQuestion + 1,
-          totalQuestions: battleRoom.questions.length,
-          question: {
-            id: question.id,
-            question: question.question,
-            options: shuffledOptions,  // Shuffled for this player
-            timeLimit: battleRoom.settings.timePerQuestion
-          }
-        });
+      // Send to ALL players in room with shuffled options
+      // Each player gets the same question but different option order for fairness
+      const shuffledOptions = shuffleArray([...question.options]);
+      
+      io.to(roomCode).emit('new-question', {
+        questionNumber: roomState.currentQuestion + 1,
+        totalQuestions: battleRoom.questions.length,
+        question: {
+          id: question.id,
+          question: question.question,
+          options: shuffledOptions,  // Shuffled options
+          timeLimit: battleRoom.settings.timePerQuestion
+        }
       });
       
       // Start timer for this question

@@ -27,7 +27,8 @@ function BattleArena() {
   const [myStats, setMyStats] = useState(null);
   const [battleSettings, setBattleSettings] = useState({
     difficulty: 'medium',
-    timePerQuestion: 15
+    timePerQuestion: 15,
+    questionCount: 10
   });
   
   // Game states
@@ -113,6 +114,17 @@ function BattleArena() {
       console.log('✅ Room updated event received:', data);
       console.log('Players from room-updated:', data.players);
       setPlayers(data.players || []);
+    });
+    
+    newSocket.on('settings-updated', (data) => {
+      console.log('⚙️ Settings updated by host:', data);
+      setBattleSettings(prev => ({
+        ...prev,
+        difficulty: data.difficulty,
+        timePerQuestion: data.timePerQuestion,
+        questionCount: data.questionCount
+      }));
+      toast.info(`⚙️ Settings updated: ${data.difficulty} difficulty, ${data.questionCount} questions, ${data.timePerQuestion}s per question`);
     });
     
     newSocket.on('battle-starting', (data) => {
@@ -276,7 +288,9 @@ function BattleArena() {
         console.log('Auto-creating battle for deckId:', deckId);
         createBattle(deckId, {
           battleType: 'private',
-          difficulty: battleSettings.difficulty
+          difficulty: battleSettings.difficulty,
+          timePerQuestion: battleSettings.timePerQuestion,
+          questionCount: battleSettings.questionCount
         });
       }
     }
@@ -299,8 +313,19 @@ function BattleArena() {
   };
   
   const handleSettingsChange = (newSettings) => {
-    setBattleSettings(newSettings);
-    toast.info(`⚙️ Settings updated: ${newSettings.difficulty} difficulty, ${newSettings.timePerQuestion}s per question`);
+    setBattleSettings(prev => ({...prev, ...newSettings}));
+    
+    // Emit settings update to server
+    if (socket && roomData?.roomCode && currentUser) {
+      socket.emit('update-battle-settings', {
+        roomCode: roomData.roomCode,
+        userId: currentUser._id || currentUser.id,
+        difficulty: newSettings.difficulty,
+        timePerQuestion: newSettings.timePerQuestion,
+        questionCount: newSettings.questionCount
+      });
+      toast.info(`⚙️ Settings updated: ${newSettings.difficulty} difficulty, ${newSettings.timePerQuestion}s per question, ${newSettings.questionCount} questions`);
+    }
   };
   
   const startBattle = () => {

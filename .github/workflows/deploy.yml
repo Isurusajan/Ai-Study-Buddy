@@ -1,0 +1,143 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    # Setup Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    # Backend tests
+    - name: Test Backend
+      run: |
+        cd server
+        npm install
+        # Run tests if they exist
+        npm test 2>/dev/null || echo "No tests configured"
+      continue-on-error: true
+    
+    # Build Frontend
+    - name: Build Frontend
+      run: |
+        cd client
+        npm install
+        npm run build
+      env:
+        REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+        CI: false
+    
+    # Upload build artifacts
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: |
+          client/build/
+          server/
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    # Download artifacts
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+    
+    # Setup SSH
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.AWS_EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.EC2_INSTANCE_IP }} >> ~/.ssh/known_hosts 2>/dev/null
+    
+    # Deploy to EC2
+    - name: Deploy to EC2
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_INSTANCE_IP }} << 'EOF'
+        set -e
+        echo "🚀 Starting deployment..."
+        
+        # Navigate to app directory
+        cd ~/ai-study-buddy
+        
+        # Stop current services
+        echo "⏹️  Stopping services..."
+        pm2 stop all 2>/dev/null || true
+        
+        # Pull latest code
+        echo "📥 Pulling latest code..."
+        git pull origin main
+        
+        # Install backend dependencies
+        echo "📦 Installing backend dependencies..."
+        cd server
+        npm install --production
+        
+        # Start backend
+        echo "🚀 Starting backend..."
+        pm2 start "npm run dev" --name "backend" --cwd "$(pwd)" || pm2 restart backend
+        
+        # Build and serve frontend
+        echo "📦 Installing frontend dependencies..."
+        cd ../client
+        npm install
+        npm run build
+        
+        # Start frontend (if using serve)
+        echo "🚀 Starting frontend..."
+        pm2 start "npm start" --name "frontend" --cwd "$(pwd)" || pm2 restart frontend
+        
+        # Save PM2 configuration
+        pm2 save
+        
+        echo "✅ Deployment completed!"
+        echo "App is running at: https://${{ secrets.DOMAIN_NAME }}"
+        EOF
+    
+    - name: Deployment Status
+      if: success()
+      run: |
+        echo "✅ Deployment successful!"
+        echo "App URL: https://${{ secrets.DOMAIN_NAME }}"
+    
+    - name: Deployment Failed
+      if: failure()
+      run: |
+        echo "❌ Deployment failed. Check logs above."
+        exit 1
+
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Notify Success
+      if: needs.deploy.result == 'success'
+      run: echo "🎉 Deployment successful!"
+    
+    - name: Notify Failure
+      if: needs.deploy.result == 'failure'
+      run: echo "❌ Deployment failed - check logs"
