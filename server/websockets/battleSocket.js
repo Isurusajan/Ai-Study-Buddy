@@ -3,6 +3,7 @@
  * Handles real-time multiplayer battle interactions
  */
 
+const mongoose = require('mongoose');
 const BattleRoom = require('../models/BattleRoom');
 const UserStats = require('../models/UserStats');
 const User = require('../models/User');
@@ -12,7 +13,7 @@ const {
   calculateAccuracy,
   calculateAverageResponseTime
 } = require('../services/eloService');
-const { checkAchievements } = require('../services/battleService');
+const { checkAchievements, shuffleArray } = require('../services/battleService');
 
 // Store active rooms in memory for performance
 const activeRooms = new Map();
@@ -25,6 +26,29 @@ module.exports = function(io) {
     console.log('👤 User connected:', socket.id);
     
     /**
+     * JOIN ROOM AS HOST event
+     * Host joins the socket room after creating it via REST API
+     */
+    socket.on('join-room-as-host', async (data) => {
+      try {
+        const { roomCode, userId } = data;
+        console.log('👑 Host joining room:', { roomCode, userId });
+        
+        // Join socket to room (this enables receiving future broadcasts)
+        socket.join(roomCode);
+        
+        // Store socket info
+        socket.roomCode = roomCode;
+        socket.userId = userId;
+        
+        console.log(`✅ Host joined socket room ${roomCode}`);
+      } catch (error) {
+        console.error('❌ Error host joining room:', error.message);
+        socket.emit('error', { message: 'Failed to join room: ' + error.message });
+      }
+    });
+    
+    /**
      * JOIN ROOM event
      * Player joins a waiting battle room
      */
@@ -32,27 +56,47 @@ module.exports = function(io) {
       try {
         const { roomCode, userId, username, avatar } = data;
         
-        // Fetch battle room from database
-        let battleRoom = await BattleRoom.findOne({ roomCode, status: 'waiting' });
+        console.log('👥 Join room attempt:', { roomCode, userId, username });
+        
+        // Fetch battle room from database (case-insensitive search)
+        let battleRoom = await BattleRoom.findOne({ 
+          roomCode: roomCode.toUpperCase(), 
+          status: 'waiting' 
+        });
         
         if (!battleRoom) {
+          console.error('❌ Room not found:', roomCode);
           return socket.emit('error', { message: 'Room not found or already started' });
         }
         
-        // Check max players
-        if (battleRoom.players.length >= battleRoom.settings.maxPlayers) {
-          return socket.emit('error', { message: 'Room is full' });
-        }
+        console.log('✅ Room found:', battleRoom.roomCode, 'Players:', battleRoom.players.length);
         
         // Check if player already in room
-        const existingPlayer = battleRoom.players.find(p => p.userId.toString() === userId);
+        console.log('🔍 Checking for existing player...');
+        console.log('Players in room:', battleRoom.players.map(p => ({
+          userId: p.userId.toString(),
+          username: p.username
+        })));
+        console.log('Joining user ID:', userId, 'Type:', typeof userId);
+        
+        const existingPlayer = battleRoom.players.find(p => {
+          const dbUserId = p.userId.toString();
+          const match = dbUserId === userId;
+          console.log(`Comparing: ${dbUserId} === ${userId} ? ${match}`);
+          return match;
+        });
+        
         if (existingPlayer) {
+          console.error('❌ Player already in room:', userId, 'Username:', existingPlayer.username);
           return socket.emit('error', { message: 'Already in this room' });
         }
         
-        // Add player to room
+        console.log('✅ Player can join, adding to room...');
+        
+        // Add player to room (ensure userId is valid ObjectId)
+        const userObjectId = mongoose.Types.ObjectId.isValid(userId) ? userId : new mongoose.Types.ObjectId(userId);
         battleRoom.players.push({
-          userId,
+          userId: userObjectId,
           username,
           avatar,
           score: 0,
@@ -72,9 +116,20 @@ module.exports = function(io) {
         // Join socket to room
         socket.join(roomCode);
         
-        // Notify all players in room
-        io.to(roomCode).emit('player-joined', {
-          player: { userId, username, avatar },
+        // Send room data back to the joining player
+        socket.emit('room-created', {
+          roomCode: battleRoom.roomCode,
+          battleId: battleRoom._id,
+          hostId: battleRoom.hostId,
+          maxPlayers: battleRoom.settings.maxPlayers,
+          questionsCount: battleRoom.settings.questionsCount,
+          timePerQuestion: battleRoom.settings.timePerQuestion,
+          players: battleRoom.players
+        });
+        
+        // Broadcast updated room data to ALL players (including host)
+        io.to(roomCode).emit('room-updated', {
+          players: battleRoom.players,
           totalPlayers: battleRoom.players.length,
           maxPlayers: battleRoom.settings.maxPlayers
         });
@@ -82,8 +137,9 @@ module.exports = function(io) {
         console.log(`✅ ${username} joined room ${roomCode}`);
         
       } catch (error) {
-        console.error('Error joining room:', error);
-        socket.emit('error', { message: 'Failed to join room' });
+        console.error('❌ Error joining room:', error.message);
+        console.error('Stack:', error.stack);
+        socket.emit('error', { message: 'Failed to join room: ' + error.message });
       }
     });
     
@@ -91,7 +147,62 @@ module.exports = function(io) {
      * START BATTLE event
      * Host starts the battle (requires minimum 2 players)
      */
-    socket.on('start-battle', async (data) => {
+    /**
+     * UPDATE BATTLE SETTINGS event
+     * Host updates difficulty, time per question, number of questions
+     */
+    socket.on('update-battle-settings', async (data) => {
+      try {
+        const { roomCode, difficulty, timePerQuestion, questionCount } = data;
+        
+        let battleRoom = await BattleRoom.findOne({ roomCode });
+        
+        if (!battleRoom) {
+          return socket.emit('error', { message: 'Room not found' });
+        }
+        
+        // Only host can update settings
+        if (battleRoom.hostId.toString() !== socket.userId) {
+          return socket.emit('error', { message: 'Only host can update settings' });
+        }
+        
+        // Can't update after battle started
+        if (battleRoom.status !== 'waiting') {
+          return socket.emit('error', { message: 'Can\'t update settings after battle started' });
+        }
+        
+        // Validate inputs
+        if (difficulty && !['easy', 'medium', 'hard'].includes(difficulty)) {
+          return socket.emit('error', { message: 'Invalid difficulty' });
+        }
+        
+        const validTimePerQuestion = timePerQuestion ? Math.min(Math.max(timePerQuestion, 5), 60) : battleRoom.settings.timePerQuestion;
+        const validQuestionCount = questionCount ? Math.min(Math.max(questionCount, 5), 20) : battleRoom.questions.length;
+        
+        // Update settings
+        battleRoom.settings.difficulty = difficulty || battleRoom.settings.difficulty;
+        battleRoom.settings.timePerQuestion = validTimePerQuestion;
+        battleRoom.settings.questionsCount = validQuestionCount;
+        
+        await battleRoom.save();
+        
+        // Broadcast updated settings to all players in room
+        io.to(roomCode).emit('settings-updated', {
+          difficulty: battleRoom.settings.difficulty,
+          timePerQuestion: validTimePerQuestion,
+          questionCount: validQuestionCount
+        });
+        
+        console.log(`⚙️ Battle settings updated in room ${roomCode}:`, battleRoom.settings);
+        
+      } catch (error) {
+        console.error('Error updating settings:', error);
+        socket.emit('error', { message: 'Failed to update settings' });
+      }
+    });
+    
+    /**
+     * START BATTLE event
       try {
         const { roomCode } = data;
         
@@ -341,15 +452,20 @@ module.exports = function(io) {
       
       const question = battleRoom.questions[roomState.currentQuestion];
       
-      io.to(roomCode).emit('new-question', {
-        questionNumber: roomState.currentQuestion + 1,
-        totalQuestions: battleRoom.questions.length,
-        question: {
-          id: question.id,
-          question: question.question,
-          options: question.options,
-          timeLimit: battleRoom.settings.timePerQuestion
-        }
+      // Send to EACH player individually with shuffled options
+      battleRoom.players.forEach(player => {
+        const shuffledOptions = shuffleArray([...question.options]);
+        
+        io.to(player.userId.toString()).emit('new-question', {
+          questionNumber: roomState.currentQuestion + 1,
+          totalQuestions: battleRoom.questions.length,
+          question: {
+            id: question.id,
+            question: question.question,
+            options: shuffledOptions,  // Shuffled for this player
+            timeLimit: battleRoom.settings.timePerQuestion
+          }
+        });
       });
       
       // Start timer for this question

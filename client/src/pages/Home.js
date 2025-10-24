@@ -1,100 +1,153 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import '../styles/homeBattle.css';
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-blue-600">AI Study Buddy</h1>
+    <div className="min-h-screen relative">
+      {/* Animated battle background */}
+      <div className="battle-background"></div>
+
+      {/* Floating knowledge orbs */}
+      <div className="particle particle-1"></div>
+      <div className="particle particle-2"></div>
+      <div className="particle particle-3"></div>
+      <div className="particle particle-4"></div>
+      <div className="particle particle-5"></div>
+
+      {/* Student characters battling */}
+      <div className="student-left">👨‍🎓</div>
+      <div className="student-right">👩‍🎓</div>
+
+      {/* Energy beam between students */}
+      <div className="energy-beam"></div>
+
+      {/* Floating cards */}
+      <div className="floating-card card-1">
+        <div className="text-2xl">📚</div>
+        <div className="text-white text-xs mt-1 font-semibold">Learn</div>
+      </div>
+      <div className="floating-card card-2">
+        <div className="text-2xl">⚡</div>
+        <div className="text-white text-xs mt-1 font-semibold">Master</div>
+      </div>
+      <div className="floating-card card-3">
+        <div className="text-2xl">🏆</div>
+        <div className="text-white text-xs mt-1 font-semibold">Win</div>
+      </div>
+
+      {/* Content overlay */}
+      <div className="battle-content">
+        {/* Navigation */}
+        <nav className="bg-white/10 backdrop-blur-md shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16 items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-2xl font-bold text-white drop-shadow-lg">AI Study Buddy</h1>
+              </div>
             </div>
-            <div className="flex space-x-4">
-              {isAuthenticated ? (
-                <Link
-                  to="/dashboard"
-                  className="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-                  >
-                    Sign in
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-                  >
-                    Sign up
-                  </Link>
-                </>
-              )}
+          </div>
+        </nav>
+
+        {/* Hero Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center">
+            <h2 className="text-5xl font-extrabold text-white sm:text-6xl hero-glow">
+              Master Any Subject with{' '}
+              <span className="text-yellow-300">AI-Powered Learning</span>
+            </h2>
+            <p className="mt-6 text-xl text-white/90 max-w-3xl mx-auto drop-shadow-lg">
+              Create flashcards, generate quizzes, summarize PDFs, practice with AI, and battle friends in multiplayer mode. 
+              All powered by advanced AI to accelerate your learning journey.
+            </p>
+
+            <div className="mt-10 flex justify-center gap-4">
+              <Link
+                to="/register"
+                className="px-8 py-3 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105"
+              >
+                Get Started Free
+              </Link>
+              <Link
+                to="/login"
+                className="px-8 py-3 rounded-md text-base font-medium text-white bg-white/20 hover:bg-white/30 shadow-lg backdrop-blur-md border border-white/30 transition-all transform hover:scale-105"
+              >
+                Sign In
+              </Link>
             </div>
           </div>
-        </div>
-      </nav>
 
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div className="text-center">
-          <h2 className="text-5xl font-extrabold text-gray-900 sm:text-6xl">
-            Learn Smarter with{' '}
-            <span className="text-blue-600">AI-Powered</span> Study Tools
-          </h2>
-          <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto">
-            Upload your study materials and let AI generate flashcards, quizzes, and summaries.
-            Master any subject with spaced repetition and intelligent learning algorithms.
-          </p>
+          {/* Features Grid */}
+          <div className="mt-24">
+            <h3 className="text-3xl font-bold text-white text-center mb-12">Powerful Features</h3>
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Feature 1 */}
+              <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-yellow-300 text-4xl mb-4">🎯</div>
+                <h3 className="text-xl font-semibold text-white mb-2">AI Quizzes</h3>
+                <p className="text-white/80">
+                  Generate intelligent multiple-choice quizzes with adaptive difficulty. Test your knowledge anytime.
+                </p>
+              </div>
 
-          <div className="mt-10 flex justify-center gap-4">
-            <Link
-              to="/register"
-              className="px-8 py-3 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg"
-            >
-              Get Started Free
-            </Link>
-            <Link
-              to="/login"
-              className="px-8 py-3 rounded-md text-base font-medium text-blue-600 bg-white hover:bg-gray-50 shadow-lg border border-blue-600"
-            >
-              Sign In
-            </Link>
+              {/* Feature 2 */}
+              <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-purple-200 text-4xl mb-4">📝</div>
+                <h3 className="text-xl font-semibold text-white mb-2">PDF Summaries</h3>
+                <p className="text-white/80">
+                  Get AI-powered summaries of your study materials. Understand key concepts instantly.
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-green-200 text-4xl mb-4">⚡</div>
+                <h3 className="text-xl font-semibold text-white mb-2">Practice Modes</h3>
+                <p className="text-white/80">
+                  Short-answer and long-answer practice with AI evaluation. Get detailed feedback instantly.
+                </p>
+              </div>
+
+              {/* Feature 4 */}
+              <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-red-300 text-4xl mb-4">⚔️</div>
+                <h3 className="text-xl font-semibold text-white mb-2">Battle Mode</h3>
+                <p className="text-white/80">
+                  Compete with friends in real-time multiplayer battles. Unlimited players, ELO ratings, leaderboards.
+                </p>
+              </div>
+
+              {/* Feature 5 */}
+              <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-pink-300 text-4xl mb-4">🏆</div>
+                <h3 className="text-xl font-semibold text-white mb-2">Achievements</h3>
+                <p className="text-white/80">
+                  Unlock badges and track your progress. Climb the global leaderboard and become a study master.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Features */}
-        <div className="mt-24 grid grid-cols-1 gap-8 sm:grid-cols-3">
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <div className="text-blue-600 text-3xl mb-4">📚</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Smart Flashcards</h3>
-            <p className="text-gray-600">
-              AI automatically generates flashcards from your PDFs and notes with intelligent spaced repetition.
+          {/* Call to Action */}
+          <div className="mt-24 bg-white/10 backdrop-blur-md p-12 rounded-lg shadow-lg border border-white/20">
+            <h3 className="text-3xl font-bold text-white text-center mb-6">Ready to Transform Your Learning?</h3>
+            <p className="text-white/90 text-center text-lg mb-8">
+              Join thousands of students using AI Study Buddy to master their subjects faster and smarter.
             </p>
-          </div>
-
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <div className="text-blue-600 text-3xl mb-4">🎯</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Adaptive Learning</h3>
-            <p className="text-gray-600">
-              Spaced repetition algorithm adapts to your learning pace, reviewing cards right before you forget.
-            </p>
-          </div>
-
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <div className="text-blue-600 text-3xl mb-4">🤖</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">AI Study Partner</h3>
-            <p className="text-gray-600">
-              Ask questions and get instant explanations. Practice with AI study group simulations.
-            </p>
+            <div className="flex justify-center gap-4">
+              <Link
+                to="/register"
+                className="px-8 py-3 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105"
+              >
+                Start Free Trial
+              </Link>
+              <Link
+                to="/login"
+                className="px-8 py-3 rounded-md text-base font-medium text-white bg-white/20 hover:bg-white/30 shadow-lg backdrop-blur-md border border-white/30 transition-all transform hover:scale-105"
+              >
+                Sign In
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -28,15 +28,17 @@ exports.createDeck = async (req, res) => {
       });
     }
 
-    // Step 1: Upload file to Cloudinary
+    // Step 1: Upload file to Cloudinary with PUBLIC delivery settings
     console.log('📤 Uploading file to Cloudinary...');
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: 'study-buddy',
           resource_type: 'auto',
-          access_type: 'anonymous', // Make files publicly accessible
-          type: 'upload'
+          type: 'upload',
+          access_type: 'token',  // Allow signed URLs but also public access
+          flags: 'immutable',     // Cache aggressively
+          delivery_type: 'upload' // Direct delivery, not restricted
         },
         (error, result) => {
           if (error) reject(error);
@@ -47,6 +49,7 @@ exports.createDeck = async (req, res) => {
     });
 
     console.log('✅ File uploaded to Cloudinary');
+    console.log('📎 File URL:', uploadResult.secure_url);
 
     // Step 2: Extract text from file
     console.log('📄 Extracting text from file...');

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import '../../styles/battleComponents.css';
 
-function LobbyScreen({ roomCode, players, isHost, onStart, onCreateRoom }) {
+function LobbyScreen({ roomCode, players, isHost, onStart, onCreateRoom, onSettingsChange }) {
   const [showSettings, setShowSettings] = useState(false);
-  const maxPlayers = 4;
-  const difficulty = 'medium';
+  const [difficulty, setDifficulty] = useState('medium');
+  const [timePerQuestion, setTimePerQuestion] = useState(15);
   
   const copyRoomCode = () => {
     navigator.clipboard.writeText(roomCode);
@@ -18,6 +18,14 @@ function LobbyScreen({ roomCode, players, isHost, onStart, onCreateRoom }) {
       return;
     }
     onStart();
+  };
+  
+  const handleSaveSettings = () => {
+    if (onSettingsChange) {
+      onSettingsChange({ difficulty, timePerQuestion });
+    }
+    setShowSettings(false);
+    toast.success('✅ Settings saved!');
   };
   
   return (
@@ -56,38 +64,61 @@ function LobbyScreen({ roomCode, players, isHost, onStart, onCreateRoom }) {
                 </div>
               </div>
             ))}
-            
-            {/* Empty slots */}
-            {Array(Math.max(0, maxPlayers - players.length)).fill(null).map((_, idx) => (
-              <div key={`empty-${idx}`} className="player-card empty-slot">
-                <div className="empty-icon">?</div>
-                <p>Waiting...</p>
-              </div>
-            ))}
           </div>
         </div>
         
         {/* Battle Settings */}
         <div className="battle-settings">
-          <h2>Settings</h2>
-          <div className="settings-grid">
-            <div className="setting-item">
-              <span className="setting-label">Max Players</span>
-              <span className="setting-value">{maxPlayers}</span>
+          <h2>⚙️ Settings {isHost && <button className="btn-icon" onClick={() => setShowSettings(!showSettings)}>✏️</button>}</h2>
+          
+          {isHost && showSettings ? (
+            <div className="settings-grid editable">
+              <div className="setting-item">
+                <label className="setting-label">Difficulty</label>
+                <select 
+                  className="setting-input"
+                  value={difficulty} 
+                  onChange={(e) => setDifficulty(e.target.value)}
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+              <div className="setting-item">
+                <label className="setting-label">Time/Question (sec)</label>
+                <input 
+                  type="number"
+                  className="setting-input"
+                  value={timePerQuestion}
+                  onChange={(e) => setTimePerQuestion(parseInt(e.target.value))}
+                  min="5"
+                  max="60"
+                />
+              </div>
+              <button className="btn btn-small btn-success" onClick={handleSaveSettings}>
+                ✅ Save
+              </button>
+              <button className="btn btn-small btn-secondary" onClick={() => setShowSettings(false)}>
+                ❌ Cancel
+              </button>
             </div>
-            <div className="setting-item">
-              <span className="setting-label">Difficulty</span>
-              <span className="setting-value capitalize">{difficulty}</span>
+          ) : (
+            <div className="settings-grid">
+              <div className="setting-item">
+                <span className="setting-label">Difficulty</span>
+                <span className="setting-value capitalize">{difficulty}</span>
+              </div>
+              <div className="setting-item">
+                <span className="setting-label">Questions</span>
+                <span className="setting-value">10</span>
+              </div>
+              <div className="setting-item">
+                <span className="setting-label">Time/Question</span>
+                <span className="setting-value">{timePerQuestion}s</span>
+              </div>
             </div>
-            <div className="setting-item">
-              <span className="setting-label">Questions</span>
-              <span className="setting-value">10</span>
-            </div>
-            <div className="setting-item">
-              <span className="setting-label">Time/Question</span>
-              <span className="setting-value">15s</span>
-            </div>
-          </div>
+          )}
         </div>
         
         {/* Action Buttons */}
@@ -100,12 +131,6 @@ function LobbyScreen({ roomCode, players, isHost, onStart, onCreateRoom }) {
                 disabled={players.length < 2}
               >
                 🚀 Start Battle
-              </button>
-              <button 
-                className="btn btn-secondary"
-                onClick={() => setShowSettings(!showSettings)}
-              >
-                ⚙️ Settings
               </button>
             </>
           )}

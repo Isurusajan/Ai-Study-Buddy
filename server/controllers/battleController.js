@@ -25,8 +25,16 @@ const {
  */
 exports.createBattleRoom = async (req, res) => {
   try {
-    const { userId } = req.user;
-    const { deckId, battleType = 'private', maxPlayers = 4, difficulty = 'medium' } = req.body;
+    const userId = req.user._id; // Get userId from authenticated user
+    const { 
+      deckId, 
+      battleType = 'private', 
+      difficulty = 'medium',
+      questionCount = 10,
+      timePerQuestion = 15
+    } = req.body;
+    
+    console.log('Creating battle room for user:', userId, 'deck:', deckId);
     
     // Validate inputs
     if (!deckId) {
@@ -35,6 +43,20 @@ exports.createBattleRoom = async (req, res) => {
         message: 'Deck ID is required' 
       });
     }
+    
+    // Validate difficulty
+    if (!['easy', 'medium', 'hard'].includes(difficulty)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Difficulty must be: easy, medium, or hard' 
+      });
+    }
+    
+    // Validate question count (5-20)
+    const validQuestionCount = Math.min(Math.max(questionCount, 5), 20);
+    
+    // Validate time per question (5-60 seconds)
+    const validTimePerQuestion = Math.min(Math.max(timePerQuestion, 5), 60);
     
     // Verify deck exists and belongs to user
     const deck = await Deck.findById(deckId);
@@ -46,12 +68,21 @@ exports.createBattleRoom = async (req, res) => {
     }
     
     // Generate questions
-    const questions = await generateBattleQuestions(deckId, 10, difficulty);
+    let questions = [];
+    try {
+      questions = await generateBattleQuestions(deckId, validQuestionCount, difficulty);
+    } catch (genError) {
+      console.error('Question generation error:', genError.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to generate questions for battle: ' + genError.message
+      });
+    }
     
     if (!questions || questions.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Failed to generate questions for battle'
+        message: 'Failed to generate questions for battle - no questions returned'
       });
     }
     
@@ -67,7 +98,7 @@ exports.createBattleRoom = async (req, res) => {
       }
     }
     
-    // Create battle room
+    // Create battle room with host as first player
     const battleRoom = await BattleRoom.create({
       roomCode,
       hostId: userId,
@@ -75,10 +106,22 @@ exports.createBattleRoom = async (req, res) => {
       battleType,
       status: 'waiting',
       questions,
+      players: [
+        {
+          userId: userId,
+          username: req.user.name,
+          avatar: req.user.avatar || 'https://via.placeholder.com/50',
+          score: 0,
+          answers: [],
+          powerUpsUsed: [],
+          joinedAt: new Date(),
+          isActive: true
+        }
+      ],
       settings: {
-        maxPlayers,
-        questionsCount: questions.length,
-        timePerQuestion: 15,
+        questionsCount: validQuestionCount,
+        timePerQuestion: validTimePerQuestion,
+        difficulty: difficulty,
         allowPowerUps: true
       }
     });
@@ -94,9 +137,9 @@ exports.createBattleRoom = async (req, res) => {
         battleId: battleRoom._id,
         hostId: battleRoom.hostId._id,
         hostName: battleRoom.hostId.name,
-        maxPlayers: battleRoom.settings.maxPlayers,
         questionsCount: battleRoom.settings.questionsCount,
-        timePerQuestion: battleRoom.settings.timePerQuestion
+        timePerQuestion: battleRoom.settings.timePerQuestion,
+        players: battleRoom.players
       }
     });
     
@@ -157,7 +200,7 @@ exports.getBattleRoom = async (req, res) => {
  */
 exports.getUserBattleStats = async (req, res) => {
   try {
-    const { userId } = req.user;
+    const userId = req.user._id; // Get userId from authenticated user
     
     let userStats = await UserStats.findOne({ userId });
     
@@ -273,7 +316,7 @@ exports.getLeaderboard = async (req, res) => {
  */
 exports.getUserBattleHistory = async (req, res) => {
   try {
-    const { userId } = req.user;
+    const userId = req.user._id; // Get userId from authenticated user
     const { limit = 10 } = req.query;
     
     const battles = await BattleRoom.find({

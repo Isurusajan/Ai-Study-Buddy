@@ -12,6 +12,7 @@ import '../styles/battleArena.css';
 function BattleArena() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const deckId = searchParams.get('deck');
   const roomCode = searchParams.get('room');
   
   // Connection states
@@ -24,6 +25,10 @@ function BattleArena() {
   const [roomData, setRoomData] = useState(null);
   const [players, setPlayers] = useState([]);
   const [myStats, setMyStats] = useState(null);
+  const [battleSettings, setBattleSettings] = useState({
+    difficulty: 'medium',
+    timePerQuestion: 15
+  });
   
   // Game states
   const [currentQuestion, setCurrentQuestion] = useState(null);
@@ -32,8 +37,6 @@ function BattleArena() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);
-  const [powerUps, setPowerUps] = useState(['50-50', 'time-freeze', 'steal-points']);
-  const [usedPowerUps, setUsedPowerUps] = useState([]);
   
   // Results states
   const [finalResults, setFinalResults] = useState(null);
@@ -52,28 +55,24 @@ function BattleArena() {
     const user = JSON.parse(userStr);
     setCurrentUser(user);
     
-    // Initialize Socket.io
-    const newSocket = io(process.env.REACT_APP_API_URL || 'http://localhost:5000', {
+    console.log('Current user loaded:', { name: user.name, id: user._id || user.id });
+    
+    // Initialize Socket.io with proper configuration
+    const socketUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const newSocket = io(socketUrl, {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5
+      reconnectionAttempts: 5,
+      transports: ['websocket', 'polling'],
+      rejectUnauthorized: false
     });
     
     // Connection events
     newSocket.on('connect', () => {
       console.log('✅ Connected to server');
       setConnected(true);
-      
-      // Join room if coming from invite
-      if (roomCode) {
-        newSocket.emit('join-room', {
-          roomCode,
-          userId: user._id,
-          username: user.name,
-          avatar: user.avatar || 'https://via.placeholder.com/50'
-        });
-      }
+      // Don't join here - let the useEffect handle joining based on roomCode/deckId
     });
     
     newSocket.on('disconnect', () => {
@@ -83,6 +82,7 @@ function BattleArena() {
     
     newSocket.on('error', (error) => {
       console.error('Socket error:', error);
+      console.error('Error message:', error.message);
       toast.error(error.message || 'Connection error');
     });
     
@@ -90,13 +90,29 @@ function BattleArena() {
     newSocket.on('room-created', (data) => {
       console.log('Room created:', data);
       setRoomData(data);
+      // Add all players from room data
+      setPlayers(data.players || []);
       setBattleState('lobby');
     });
     
     newSocket.on('player-joined', (data) => {
       console.log('Player joined:', data);
-      setPlayers(prev => [...prev, data.player]);
+      // Only add if not already in players list
+      setPlayers(prev => {
+        const alreadyExists = prev.some(p => p.userId.toString() === data.player.userId.toString());
+        if (alreadyExists) {
+          console.log('Player already in list, skipping duplicate');
+          return prev;
+        }
+        return [...prev, data.player];
+      });
       toast.success(`${data.player.username} joined! (${data.totalPlayers}/${data.maxPlayers})`);
+    });
+
+    newSocket.on('room-updated', (data) => {
+      console.log('✅ Room updated event received:', data);
+      console.log('Players from room-updated:', data.players);
+      setPlayers(data.players || []);
     });
     
     newSocket.on('battle-starting', (data) => {
@@ -172,7 +188,7 @@ function BattleArena() {
       setBattleState('finished');
       setBattleFinished(true);
       
-      if (data.winner.userId === currentUser._id) {
+      if (currentUser && data.winner.userId === currentUser._id) {
         toast.success('🎉 YOU WON! 🎉');
       } else {
         toast.info(`${data.winner.username} won!`);
@@ -184,7 +200,7 @@ function BattleArena() {
     return () => {
       newSocket.close();
     };
-  }, [roomCode, navigate]);
+  }, [navigate]);
   
   // Create new battle room
   const createBattle = async (deckId, settings) => {
@@ -203,16 +219,25 @@ function BattleArena() {
         }
       );
       
-      const { roomCode, battleId } = response.data.data;
+      const { roomCode, battleId, players } = response.data.data;
+      console.log('✅ Battle created response:', { roomCode, battleId, players });
       setRoomData({ roomCode, battleId });
       
-      // Join the room
+      // Set players from response (includes host)
+      console.log('Setting players from response:', players);
+      setPlayers(players || [{
+        userId: currentUser._id || currentUser.id,
+        username: currentUser.name,
+        avatar: currentUser.avatar || 'https://via.placeholder.com/50',
+        score: 0
+      }]);
+      
+      // Emit socket event to join the room (for receiving future updates)
       if (socket && connected) {
-        socket.emit('join-room', {
-          roomCode,
-          userId: currentUser._id,
-          username: currentUser.name,
-          avatar: currentUser.avatar || 'https://via.placeholder.com/50'
+        console.log('Emitting join-room-as-host for:', roomCode);
+        socket.emit('join-room-as-host', {
+          roomCode: roomCode,
+          userId: currentUser._id || currentUser.id
         });
       }
       
@@ -220,40 +245,62 @@ function BattleArena() {
       toast.success(`Battle created! Room code: ${roomCode}`);
     } catch (error) {
       console.error('Error creating battle:', error);
-      toast.error(error.response?.data?.message || 'Failed to create battle');
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to create battle';
+      console.error('Full error message:', errorMsg);
+      toast.error(errorMsg);
     }
   };
+  
+  // Auto-create battle when user has deckId and socket is connected
+  useEffect(() => {
+    if (connected && socket && currentUser && battleState === 'joining') {
+      const userId = currentUser._id || currentUser.id;
+      
+      console.log('Attempting to join or create battle...');
+      console.log('userId:', userId, 'deckId:', deckId, 'roomCode:', roomCode);
+      
+      // If joining existing room
+      if (roomCode && !deckId) {
+        console.log('Joining existing room:', roomCode, 'with userId:', userId);
+        socket.emit('join-room', {
+          roomCode: roomCode.toUpperCase(),
+          userId: userId,
+          username: currentUser.name,
+          avatar: currentUser.avatar || 'https://via.placeholder.com/50'
+        });
+      }
+      // If creating new room with deckId
+      else if (deckId && !roomCode) {
+        console.log('Auto-creating battle for deckId:', deckId);
+        createBattle(deckId, {
+          battleType: 'private',
+          difficulty: battleSettings.difficulty
+        });
+      }
+    }
+  }, [connected, socket, deckId, roomCode, battleState, currentUser]);
   
   const submitAnswer = (answer) => {
     if (!socket || selectedAnswer) return;
     
+    const userId = currentUser._id || currentUser.id;
     setSelectedAnswer(answer);
     const timeTaken = (currentQuestion.timeLimit - timeLeft) * 1000;
     
     socket.emit('submit-answer', {
       roomCode: roomData.roomCode,
-      userId: currentUser._id,
+      userId: userId,
       questionId: currentQuestion.id,
       answer,
       timeTaken
     });
   };
   
-  const usePowerUp = (powerUpType) => {
-    if (!socket) return;
-    if (usedPowerUps.includes(powerUpType)) {
-      toast.warning('Power-up already used!');
-      return;
-    }
-    
-    socket.emit('use-powerup', {
-      roomCode: roomData.roomCode,
-      userId: currentUser._id,
-      powerUpType
-    });
-    
-    setUsedPowerUps(prev => [...prev, powerUpType]);
-    toast.success(`🎉 ${powerUpType} activated!`);
+  const handleSettingsChange = (newSettings) => {
+    setBattleSettings(newSettings);
+    toast.info(`⚙️ Settings updated: ${newSettings.difficulty} difficulty, ${newSettings.timePerQuestion}s per question`);
   };
   
   const startBattle = () => {
@@ -293,9 +340,10 @@ function BattleArena() {
         <LobbyScreen
           roomCode={roomData?.roomCode}
           players={players}
-          isHost={roomData?.hostId === currentUser._id}
+          isHost={currentUser && roomData?.hostId === currentUser._id}
           onStart={startBattle}
           onCreateRoom={createBattle}
+          onSettingsChange={handleSettingsChange}
         />
       )}
       
@@ -313,9 +361,6 @@ function BattleArena() {
           score={score}
           selectedAnswer={selectedAnswer}
           onAnswer={submitAnswer}
-          powerUps={powerUps}
-          usedPowerUps={usedPowerUps}
-          onUsePowerUp={usePowerUp}
         />
       )}
       
@@ -323,7 +368,7 @@ function BattleArena() {
         <ResultsScreen
           finalResults={finalResults}
           winner={winner}
-          currentUserId={currentUser._id}
+          currentUserId={currentUser?._id}
           onPlayAgain={playAgain}
           onBackToDashboard={backToDashboard}
         />

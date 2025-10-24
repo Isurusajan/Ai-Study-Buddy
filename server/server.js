@@ -15,11 +15,14 @@ const server = http.createServer(app);
 // Initialize Socket.io with CORS configuration
 const io = socketIO(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: true, // Accept all origins in development
+    methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true
   },
   transports: ['websocket', 'polling'],
-  pingTimeout: 60000
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  perMessageDeflate: false
 });
 
 // Connect to MongoDB
@@ -28,7 +31,15 @@ connectDB();
 // ===== MIDDLEWARE =====
 
 // Enable CORS (allows frontend to make requests from different domain)
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Handle preflight requests
+app.options('*', cors());
 
 // Parse JSON request bodies
 app.use(express.json());

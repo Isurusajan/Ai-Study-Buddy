@@ -11,6 +11,7 @@ import ViewPDF from './pages/ViewPDF';
 import ShortAnswerPractice from './pages/ShortAnswerPractice';
 import LongAnswerPractice from './pages/LongAnswerPractice';
 import AskQuestion from './pages/AskQuestion';
+import BattleArena from './pages/BattleArena';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="/short-answer/:deckId" element={<ShortAnswerPractice />} />
             <Route path="/long-answer/:deckId" element={<LongAnswerPractice />} />
             <Route path="/ask/:deckId" element={<AskQuestion />} />
+            <Route path="/battle-arena" element={<BattleArena />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
