@@ -52,6 +52,7 @@ sudo env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ec2-user --hp /home/ec
 ```
 
 **Get your EC2 public IP** (you'll need it for frontend API calls):
+
 ```bash
 curl http://checkip.amazonaws.com
 # Output: 54.123.45.67 (example)
@@ -99,7 +100,7 @@ frontend:
   artifacts:
     baseDirectory: client/build
     files:
-      - '**/*'
+      - "**/*"
   cache:
     paths:
       - client/node_modules/**/*
@@ -112,6 +113,7 @@ backend:
 ```
 
 **IMPORTANT**: Replace `https://your-api-domain.com` with your actual backend URL:
+
 - If using EC2 with domain: `https://api.yourdomain.com`
 - If using EC2 IP temporarily: `https://54.123.45.67:5000`
 
@@ -168,6 +170,7 @@ git push origin main
 ```
 
 **Amplify automatically:**
+
 1. ✅ Detects the push
 2. ✅ Clones your repo
 3. ✅ Installs dependencies
@@ -226,6 +229,7 @@ User visits myapp.com → Served from nearest CDN server → Lightning fast!
 ```
 
 When user clicks "Login" → Frontend calls backend API:
+
 ```
 https://myapp.com (React frontend from Amplify CDN)
        ↓
@@ -288,13 +292,13 @@ Backend responds (running on EC2)
 
 ## Free Tier Details
 
-| Service | Free Tier | Your Cost |
-|---------|-----------|-----------|
-| **Amplify** | 15 GB/month build + 1 GB/month hosting | ✅ $0 (within limits) |
-| **EC2** | 750 hours/month t3.micro | ✅ $0 for 12 months |
-| **Data Transfer** | 100 GB/month out | ✅ Sufficient |
-| **Custom Domain** | Not included | ~$10/year (Route 53) |
-| **SSL Certificate** | Free (auto) | ✅ $0 |
+| Service             | Free Tier                              | Your Cost             |
+| ------------------- | -------------------------------------- | --------------------- |
+| **Amplify**         | 15 GB/month build + 1 GB/month hosting | ✅ $0 (within limits) |
+| **EC2**             | 750 hours/month t3.micro               | ✅ $0 for 12 months   |
+| **Data Transfer**   | 100 GB/month out                       | ✅ Sufficient         |
+| **Custom Domain**   | Not included                           | ~$10/year (Route 53)  |
+| **SSL Certificate** | Free (auto)                            | ✅ $0                 |
 
 **Total cost**: **$0-10/year** if you use free tier domains 🎉
 
@@ -303,21 +307,25 @@ Backend responds (running on EC2)
 ## Common Issues & Fixes
 
 ### Build fails: "Cannot find module"
+
 - **Fix**: Check `client/package.json` has all dependencies
 - Run locally: `cd client && npm install && npm run build`
 - Commit the fix, push again
 
 ### Build succeeds but app shows blank page
+
 - **Fix**: Check browser console for errors
 - Likely issue: `REACT_APP_API_URL` not set in Amplify environment variables
 - Update env var, redeploy
 
 ### API calls fail (404 or CORS errors)
+
 - **Fix**: Check `REACT_APP_API_URL` in Amplify matches your backend domain
 - Check EC2 backend is running: `pm2 status` on EC2
 - Check security group allows HTTPS (port 443)
 
 ### "Cannot get /..."
+
 - **Fix**: This happens when Amplify redirects wrong. Add this to build config:
 
 ```yaml
@@ -331,6 +339,7 @@ frontend:
 ```
 
 ### Deployment takes too long
+
 - **Fix**: Normal first time takes 5-10 minutes
 - Subsequent builds: 2-5 minutes
 - Check build logs in Amplify console
@@ -339,15 +348,15 @@ frontend:
 
 ## Step-by-Step Summary
 
-| Step | Action | Time |
-|------|--------|------|
-| 1 | Setup EC2 backend | 10 min |
-| 2 | Connect GitHub to Amplify | 2 min |
-| 3 | Configure build settings | 5 min |
-| 4 | Set environment variables | 1 min |
-| 5 | Click "Deploy" | Auto |
-| 6 | **First deployment** | 5-10 min |
-| **Total Setup** | | **~30 min** |
+| Step            | Action                    | Time        |
+| --------------- | ------------------------- | ----------- |
+| 1               | Setup EC2 backend         | 10 min      |
+| 2               | Connect GitHub to Amplify | 2 min       |
+| 3               | Configure build settings  | 5 min       |
+| 4               | Set environment variables | 1 min       |
+| 5               | Click "Deploy"            | Auto        |
+| 6               | **First deployment**      | 5-10 min    |
+| **Total Setup** |                           | **~30 min** |
 
 **After setup**, every deployment is automatic when you push to GitHub! ✅
 
@@ -402,6 +411,7 @@ git push origin main
 ## Never Go Back to Manual Deploys!
 
 **Old way (S3 + CloudFront):**
+
 ```bash
 npm run build
 aws s3 sync client/build s3://my-bucket
@@ -411,6 +421,7 @@ aws s3 sync client/build s3://my-bucket
 ```
 
 **New way (Amplify):**
+
 ```bash
 git push origin main
 # Automatic deployment
@@ -428,8 +439,8 @@ Once you're comfortable with Amplify frontend, we can add GitHub Actions for bac
 on:
   push:
     paths:
-      - 'server/**'
-      - '.github/workflows/**'
+      - "server/**"
+      - ".github/workflows/**"
 
 jobs:
   deploy:
@@ -456,4 +467,3 @@ But **Amplify handles all frontend** from now on! 🚀
 ---
 
 **You're ready!** Let's get this deployed! 🎉
-

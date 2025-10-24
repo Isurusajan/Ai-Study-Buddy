@@ -22,6 +22,7 @@ JWT_SECRET                   → (Generate: $(openssl rand -base64 32))
 ## Step 2: Create EC2 Instance
 
 ### Using AWS Console:
+
 1. Go to EC2 Dashboard
 2. Launch Instance
 3. Choose AMI: **Amazon Linux 2** or **Ubuntu 22.04**
@@ -31,6 +32,7 @@ JWT_SECRET                   → (Generate: $(openssl rand -base64 32))
 7. Launch!
 
 ### Or using AWS CLI:
+
 ```bash
 aws ec2 run-instances \
   --image-id ami-0c55b159cbfafe1f0 \
@@ -42,12 +44,14 @@ aws ec2 run-instances \
 ## Step 3: Setup EC2 Instance
 
 SSH into your instance:
+
 ```bash
 chmod 600 your-key.pem
 ssh -i your-key.pem ec2-user@your-instance-ip
 ```
 
 Run these commands:
+
 ```bash
 # Update system
 sudo yum update -y
@@ -108,6 +112,7 @@ sudo systemctl enable nginx
 ## Step 4: Configure Nginx (Optional but Recommended)
 
 Create `/etc/nginx/conf.d/ai-study-buddy.conf`:
+
 ```nginx
 upstream backend {
     server localhost:5000;
@@ -120,7 +125,7 @@ upstream frontend {
 server {
     listen 80;
     server_name your-domain.com www.your-domain.com;
-    
+
     # Redirect HTTP to HTTPS
     return 301 https://$server_name$request_uri;
 }
@@ -128,11 +133,11 @@ server {
 server {
     listen 443 ssl http2;
     server_name your-domain.com www.your-domain.com;
-    
+
     # SSL certificate (use AWS Certificate Manager)
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
-    
+
     # Frontend
     location / {
         proxy_pass http://frontend;
@@ -142,7 +147,7 @@ server {
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
     }
-    
+
     # API
     location /api {
         proxy_pass http://backend;
@@ -152,7 +157,7 @@ server {
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
     }
-    
+
     # WebSocket
     location /socket.io {
         proxy_pass http://backend;
@@ -166,6 +171,7 @@ server {
 ```
 
 Test and reload:
+
 ```bash
 sudo nginx -t
 sudo systemctl reload nginx
@@ -174,12 +180,14 @@ sudo systemctl reload nginx
 ## Step 5: Setup SSL Certificate
 
 ### Using AWS Certificate Manager:
+
 1. Go to AWS Certificate Manager
 2. Request certificate for your domain
 3. Validate ownership via DNS
 4. Get certificate ARN
 
 Or use **Let's Encrypt** (free):
+
 ```bash
 sudo yum install -y certbot python-certbot-nginx
 sudo certbot certonly --nginx -d your-domain.com -d www.your-domain.com
@@ -218,17 +226,20 @@ pm2 monit
 ## 🔍 Troubleshooting
 
 ### Deployment fails at SSH step
+
 - Check EC2_INSTANCE_IP secret is correct
 - Verify security group allows SSH (port 22)
 - Check private key is valid (full content in secret)
 
 ### App doesn't start after deployment
+
 ```bash
 pm2 logs backend
 pm2 logs frontend
 ```
 
 ### Environment variables not loading
+
 ```bash
 # Check .env files
 cat server/.env
@@ -239,6 +250,7 @@ pm2 restart all
 ```
 
 ### Port conflicts
+
 ```bash
 # Check what's using ports
 lsof -i :5000
@@ -253,6 +265,7 @@ kill -9 <PID>
 Your app should now be running on `https://your-domain.com`!
 
 Every time you push to `main` branch, GitHub Actions automatically:
+
 1. ✅ Builds frontend
 2. ✅ Tests backend
 3. ✅ Deploys to EC2

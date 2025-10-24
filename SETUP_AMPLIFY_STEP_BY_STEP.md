@@ -3,6 +3,7 @@
 ## Overview
 
 You'll have:
+
 - **Frontend**: Deployed on AWS Amplify (auto-deploy on every git push)
 - **Backend**: Running on AWS EC2 t3.micro (free tier)
 - **Database**: MongoDB Atlas (free tier)
@@ -33,10 +34,11 @@ You'll have:
 3. Click **"Launch Instance"**
 
 **Configure Instance:**
+
 - **Name**: `ai-study-buddy-backend`
 - **AMI (Operating System)**: Select **"Amazon Linux 2 AMI"** (free tier eligible)
 - **Instance Type**: Select **"t3.micro"** (free tier eligible)
-- **Key Pair**: 
+- **Key Pair**:
   - Click **"Create new key pair"**
   - Name: `ai-study-buddy-key`
   - Type: **RSA**
@@ -45,6 +47,7 @@ You'll have:
   - **SAVE THIS FILE SAFELY** - you'll need it to connect!
 
 **Network Settings:**
+
 - Click **"Edit"**
 - **VPC**: Default VPC
 - **Subnet**: Default subnet
@@ -60,6 +63,7 @@ You'll have:
     ```
 
 **Storage:**
+
 - Size: 30 GB (free tier includes 30GB)
 - Leave other settings default
 
@@ -105,6 +109,7 @@ ssh -i ai-study-buddy-key.pem ec2-user@54.123.45.67
 ```
 
 **You should see:**
+
 ```
 [ec2-user@ip-xxx ~]$
 ```
@@ -181,7 +186,8 @@ EOF
 
 **Instructions:**
 
-1. **MONGODB_URI**: 
+1. **MONGODB_URI**:
+
    - Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
    - If not already done: Create account → Create free cluster
    - Go to **"Databases"** → Click your cluster
@@ -191,6 +197,7 @@ EOF
    - Example: `mongodb+srv://username:password@cluster.mongodb.net/ai-study-buddy?retryWrites=true&w=majority`
 
 2. **CLOUDINARY_NAME, API_KEY, API_SECRET**:
+
    - Go to [Cloudinary Dashboard](https://cloudinary.com/console)
    - Copy your **"Cloud Name"** → paste in CLOUDINARY_NAME
    - Go to Settings → API Keys
@@ -198,6 +205,7 @@ EOF
    - Copy **"API Secret"** → paste in CLOUDINARY_API_SECRET
 
 3. **JWT_SECRET**:
+
    - Generate random string (use any random text, e.g., `your-super-secret-key-12345`)
    - **Make it strong and random!**
 
@@ -206,6 +214,7 @@ EOF
    - We'll update it after Amplify deployment
 
 **Save the file:**
+
 ```bash
 # View to verify
 cat .env
@@ -323,7 +332,7 @@ frontend:
   artifacts:
     baseDirectory: client/build
     files:
-      - '**/*'
+      - "**/*"
   cache:
     paths:
       - client/node_modules/**/*
@@ -359,11 +368,13 @@ REACT_APP_API_URL = http://54.123.45.67:5000
 3. Amplify will start building!
 
 **Watch the build progress:**
+
 - The console shows real-time output
 - First deployment takes 5-10 minutes
 - You'll see: "✅ Deployment successful"
 
 When done, you'll get a URL like:
+
 ```
 https://main.dxxxxx.amplifyapp.com
 ```
@@ -417,7 +428,7 @@ pm2 logs backend
 1. On the frontend, click **"Login"**
 2. Try logging in with test credentials
 3. **If it works**: Frontend ↔ Backend connection is working! ✅
-4. **If it fails**: 
+4. **If it fails**:
    - Open browser console (F12)
    - Check for errors
    - Verify `REACT_APP_API_URL` in Amplify env variables
@@ -452,6 +463,7 @@ git push origin main
 ```
 
 **Amplify automatically:**
+
 1. Detects the push
 2. Builds your React app
 3. Deploys to CDN
@@ -464,6 +476,7 @@ git push origin main
 ### Problem: Amplify build fails
 
 **Check the logs:**
+
 1. Go to Amplify console
 2. Click **"Deployments"** tab
 3. Click the failed deployment
@@ -474,6 +487,7 @@ git push origin main
    - Missing environment variables
 
 **Fix:**
+
 1. Fix the issue locally
 2. Test: `npm run build` in client folder
 3. Commit and push
@@ -484,6 +498,7 @@ git push origin main
 ### Problem: Frontend can't reach backend
 
 **Debug:**
+
 1. Check EC2 instance is running: AWS Console → EC2 → Instances
 2. Check security group allows port 5000: EC2 → Security Groups → `ai-study-buddy-sg`
 3. Check `REACT_APP_API_URL` in Amplify is correct
@@ -495,6 +510,7 @@ git push origin main
 ### Problem: MongoDB connection failed
 
 **Check:**
+
 1. Is MongoDB Atlas cluster running? (Dashboard → Clusters)
 2. Is IP whitelisted? (MongoDB Atlas → Network Access → Add IP address)
 3. Is connection string correct? (copy fresh from MongoDB Atlas)
@@ -505,6 +521,7 @@ git push origin main
 ### Problem: Cloudinary image/PDF not loading
 
 **Check:**
+
 1. Is Cloudinary API key correct?
 2. Is file security settings correct? (already did this)
 3. Did you re-upload the file after fixing settings?
@@ -523,6 +540,7 @@ curl http://54.123.45.67:5000/api/health
 ```
 
 Or from AWS Console:
+
 1. EC2 Dashboard → Instances
 2. Look for "ai-study-buddy-backend"
 3. Should show "Running" status ✅
@@ -573,19 +591,23 @@ pm2 start backend
 After everything is working:
 
 1. **Add Custom Domain**
+
    - Go to Amplify → Domain Management
    - Add your custom domain (e.g., mystudybuddy.com)
    - Point DNS to Amplify
 
 2. **Setup Monitoring**
+
    - AWS CloudWatch
    - Email alerts on errors
 
 3. **Enable HTTPS on EC2**
+
    - Install Nginx + Let's Encrypt
    - Proxy backend through HTTPS
 
 4. **Auto-Backup MongoDB**
+
    - MongoDB Atlas → Backup settings
    - Enable continuous backups
 
@@ -618,6 +640,7 @@ After everything is working:
 ## You're Done! 🎉
 
 Your app is now:
+
 - ✅ Deployed on AWS (free tier)
 - ✅ Auto-deploys on every git push
 - ✅ Running on Amplify (frontend)
@@ -629,6 +652,7 @@ Your app is now:
 **No more manual deployments. No more S3 uploads. Pure automation!**
 
 Every time you code:
+
 ```bash
 git push origin main
 # Amplify automatically builds & deploys ✨

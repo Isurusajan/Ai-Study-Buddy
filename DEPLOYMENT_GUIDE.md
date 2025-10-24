@@ -1,6 +1,7 @@
 # 🚀 AWS Deployment Guide - CI/CD Pipeline
 
 ## Overview
+
 Deploy **AI Study Buddy** to AWS using CI/CD pipeline (GitHub Actions + AWS services). No S3 needed - we'll use EC2 or Elastic Beanstalk.
 
 ---
@@ -8,12 +9,14 @@ Deploy **AI Study Buddy** to AWS using CI/CD pipeline (GitHub Actions + AWS serv
 ## Option 1: AWS Elastic Beanstalk (RECOMMENDED - Easiest)
 
 ### ✅ Best For
+
 - Full-stack deployment (React + Node.js)
 - Automatic scaling
 - Easy environment management
 - Built-in CI/CD support
 
 ### 📋 Prerequisites
+
 1. AWS Account with IAM permissions
 2. AWS CLI installed: `aws configure`
 3. GitHub repository (already have it ✅)
@@ -22,6 +25,7 @@ Deploy **AI Study Buddy** to AWS using CI/CD pipeline (GitHub Actions + AWS serv
 ### 🔧 Setup Steps
 
 #### Step 1: Prepare for Beanstalk
+
 ```bash
 # Install EB CLI
 pip install awsebcli --upgrade --user
@@ -31,6 +35,7 @@ choco install awsebcli
 ```
 
 #### Step 2: Initialize Beanstalk
+
 ```bash
 # In project root
 eb init -p node.js-18 ai-study-buddy --region us-east-1
@@ -38,6 +43,7 @@ eb create study-buddy-env
 ```
 
 #### Step 3: Configure Environment Variables
+
 ```bash
 # Set environment variables in EB
 eb setenv MONGODB_URI="your_mongodb_connection" \
@@ -49,6 +55,7 @@ eb setenv MONGODB_URI="your_mongodb_connection" \
 ```
 
 #### Step 4: Deploy
+
 ```bash
 # Deploy the application
 eb deploy
@@ -62,12 +69,14 @@ eb logs
 ## Option 2: GitHub Actions + EC2 (More Control)
 
 ### ✅ Best For
+
 - Full control over deployment
 - Custom deployment logic
 - Multiple environments
 - Cost-effective
 
 ### 📋 Architecture
+
 ```
 GitHub Repository
     ↓ (on push to main)
@@ -91,9 +100,9 @@ name: Deploy to AWS EC2
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
   AWS_REGION: us-east-1
@@ -104,51 +113,51 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    # Install dependencies
-    - name: Install Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-    
-    # Test Backend
-    - name: Test Backend
-      run: |
-        cd server
-        npm install
-        npm test 2>/dev/null || true
-      continue-on-error: true
-    
-    # Build Frontend
-    - name: Build Frontend
-      run: |
-        cd client
-        npm install
-        npm run build
-      env:
-        REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
-    
-    # Setup SSH
-    - name: Setup SSH Key
-      run: |
-        mkdir -p /home/runner/.ssh
-        echo "${{ secrets.AWS_EC2_PRIVATE_KEY }}" > /home/runner/.ssh/aws-key.pem
-        chmod 600 /home/runner/.ssh/aws-key.pem
-        ssh-keyscan -H ${{ env.EC2_INSTANCE_IP }} >> /home/runner/.ssh/known_hosts
-    
-    # Deploy to EC2
-    - name: Deploy to EC2
-      run: |
-        ssh -i /home/runner/.ssh/aws-key.pem ${{ env.EC2_USER }}@${{ env.EC2_INSTANCE_IP }} << 'EOF'
-        cd /home/ec2-user/ai-study-buddy
-        git pull origin main
-        cd server && npm install && npm start &
-        cd ../client && npm install && npm run build
-        pm2 restart all || true
-        EOF
+      - uses: actions/checkout@v3
+
+      # Install dependencies
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      # Test Backend
+      - name: Test Backend
+        run: |
+          cd server
+          npm install
+          npm test 2>/dev/null || true
+        continue-on-error: true
+
+      # Build Frontend
+      - name: Build Frontend
+        run: |
+          cd client
+          npm install
+          npm run build
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+
+      # Setup SSH
+      - name: Setup SSH Key
+        run: |
+          mkdir -p /home/runner/.ssh
+          echo "${{ secrets.AWS_EC2_PRIVATE_KEY }}" > /home/runner/.ssh/aws-key.pem
+          chmod 600 /home/runner/.ssh/aws-key.pem
+          ssh-keyscan -H ${{ env.EC2_INSTANCE_IP }} >> /home/runner/.ssh/known_hosts
+
+      # Deploy to EC2
+      - name: Deploy to EC2
+        run: |
+          ssh -i /home/runner/.ssh/aws-key.pem ${{ env.EC2_USER }}@${{ env.EC2_INSTANCE_IP }} << 'EOF'
+          cd /home/ec2-user/ai-study-buddy
+          git pull origin main
+          cd server && npm install && npm start &
+          cd ../client && npm install && npm run build
+          pm2 restart all || true
+          EOF
 ```
 
 #### Step 2: Add GitHub Secrets
@@ -156,6 +165,7 @@ jobs:
 Go to GitHub Repository → Settings → Secrets → New Secret
 
 Add:
+
 - `AWS_EC2_PRIVATE_KEY` - Your EC2 key pair (private key)
 - `EC2_INSTANCE_IP` - Your EC2 instance public IP
 - `MONGODB_URI` - MongoDB connection string
@@ -201,12 +211,14 @@ pm2 startup
 ## Option 3: AWS CodePipeline (Most Enterprise-Ready)
 
 ### ✅ Best For
+
 - Enterprise deployments
 - Multiple stages (dev, staging, prod)
 - Advanced testing
 - Full AWS integration
 
 ### 📋 Architecture
+
 ```
 GitHub Repository
     ↓
@@ -222,6 +234,7 @@ EC2 / Elastic Beanstalk
 ### 🔧 Setup Steps
 
 #### Step 1: Create CodePipeline
+
 1. Go to AWS CodePipeline console
 2. Click "Create pipeline"
 3. Pipeline name: `ai-study-buddy-pipeline`
@@ -232,6 +245,7 @@ EC2 / Elastic Beanstalk
 8. Branch: `main`
 
 #### Step 2: Configure Build Stage
+
 1. Build provider: AWS CodeBuild
 2. Create project
 3. Environment:
@@ -251,27 +265,28 @@ phases:
     commands:
       - echo "Installing dependencies..."
       - cd server && npm install && cd ../client && npm install
-  
+
   build:
     commands:
       - echo "Building application..."
       - cd client && npm run build
       - cd ../server && npm install --production
-  
+
   post_build:
     commands:
       - echo "Build completed"
 
 artifacts:
   files:
-    - '**/*'
+    - "**/*"
   name: BuildArtifact
   exclude:
     - node_modules/**/*
-    - '.git/**/*'
+    - ".git/**/*"
 ```
 
 #### Step 4: Configure Deploy Stage
+
 1. Deploy provider: CodeDeploy
 2. Create CodeDeploy application
 3. Compute platform: EC2/On-premises
@@ -306,12 +321,14 @@ Files:
 #### Step 6: Create Deployment Scripts
 
 Create `scripts/stop.sh`:
+
 ```bash
 #!/bin/bash
 pm2 stop all || true
 ```
 
 Create `scripts/start.sh`:
+
 ```bash
 #!/bin/bash
 cd /home/ec2-user/ai-study-buddy
@@ -325,6 +342,7 @@ pm2 restart all
 ## Option 4: AWS Amplify (Simplest for Frontend)
 
 ### ✅ Best For
+
 - React frontend only
 - Serverless hosting
 - Automatic deployments
@@ -347,12 +365,15 @@ pm2 restart all
 ## 🔐 Security Best Practices
 
 ### Environment Variables
+
 Never commit secrets! Use:
+
 - GitHub Secrets for CI/CD
 - AWS Secrets Manager for production
 - Environment variable files (.env.local - in .gitignore)
 
 ### Example .env.local (DO NOT COMMIT)
+
 ```
 MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/db
 CLOUDINARY_API_KEY=your_key_here
@@ -362,24 +383,19 @@ REACT_APP_API_URL=https://api.yourdomain.com
 ```
 
 ### IAM Permissions (Minimal)
+
 ```json
 {
   "Version": "2012-10-17",
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": [
-        "ec2:DescribeInstances",
-        "ec2:GetConsoleOutput"
-      ],
+      "Action": ["ec2:DescribeInstances", "ec2:GetConsoleOutput"],
       "Resource": "*"
     },
     {
       "Effect": "Allow",
-      "Action": [
-        "codedeploy:CreateDeployment",
-        "codedeploy:GetDeployment"
-      ],
+      "Action": ["codedeploy:CreateDeployment", "codedeploy:GetDeployment"],
       "Resource": "*"
     }
   ]
@@ -431,12 +447,14 @@ External Services:
 ## 🔍 Monitoring & Logs
 
 ### CloudWatch Logs
+
 ```bash
 # View logs from AWS CLI
 aws logs tail /aws/elasticbeanstalk/ai-study-buddy/var/log/eb-activity.log --follow
 ```
 
 ### Application Health Check
+
 - Set up CloudWatch alarms
 - Monitor API response times
 - Track error rates
@@ -446,14 +464,14 @@ aws logs tail /aws/elasticbeanstalk/ai-study-buddy/var/log/eb-activity.log --fol
 
 ## 💰 Cost Estimation (Monthly)
 
-| Service | Cost | Notes |
-|---------|------|-------|
-| EC2 t3.micro | $8 | Free tier eligible |
-| NAT Gateway | $45 | If needed for outbound |
-| MongoDB Atlas | $0-57 | Shared tier free, M0 |
-| CloudFront | $0.085/GB | Typical: $10-20 |
-| Route 53 | $0.50 | Per hosted zone |
-| **Total** | **~$60-80** | Very scalable |
+| Service       | Cost        | Notes                  |
+| ------------- | ----------- | ---------------------- |
+| EC2 t3.micro  | $8          | Free tier eligible     |
+| NAT Gateway   | $45         | If needed for outbound |
+| MongoDB Atlas | $0-57       | Shared tier free, M0   |
+| CloudFront    | $0.085/GB   | Typical: $10-20        |
+| Route 53      | $0.50       | Per hosted zone        |
+| **Total**     | **~$60-80** | Very scalable          |
 
 ---
 
