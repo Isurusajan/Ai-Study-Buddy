@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { InlineSpinner } from '../components/Loading/LoadingSpinner';
+import LoadingSpinner from '../components/Loading/LoadingSpinner';
 
 const AskQuestion = () => {
   const { deckId } = useParams();
