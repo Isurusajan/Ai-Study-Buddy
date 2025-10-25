@@ -129,15 +129,15 @@ const Dashboard = () => {
       {/* Navigation */}
       <nav className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center gap-2">
+          <div className="flex justify-between h-14 sm:h-16 items-center gap-2">
             <div className="flex-shrink-0">
-              <h1 className="text-lg sm:text-2xl font-bold text-blue-600">🤖 AI Study Buddy</h1>
+              <h1 className="text-sm sm:text-2xl font-bold text-blue-600 whitespace-nowrap">🤖 Study Buddy</h1>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <span className="text-xs sm:text-sm text-gray-700 hidden sm:inline">Welcome, <span className="font-semibold">{user.name}</span>!</span>
+              <span className="text-xs text-gray-700 hidden sm:inline">Welcome, <span className="font-semibold">{user.name}</span>!</span>
               <button
                 onClick={logout}
-                className="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
+                className="px-2 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors whitespace-nowrap"
               >
                 Logout
               </button>
@@ -147,31 +147,33 @@ const Dashboard = () => {
       </nav>
 
       {/* Dashboard Content */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-8">
         {/* Header with Upload Button */}
-        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h2>
-            <p className="mt-1 text-xs sm:text-sm text-gray-600">Track your progress & manage study materials</p>
+        <div className="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 truncate">Dashboard</h2>
+            <p className="mt-1 text-xs sm:text-sm text-gray-600">Track progress & manage materials</p>
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-1 sm:gap-2 flex-wrap flex-shrink-0">
             <button
               onClick={() => setShowJoinBattle(!showJoinBattle)}
-              className="px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center gap-2 text-xs sm:text-sm transition-colors"
+              className="px-2 sm:px-4 py-1.5 sm:py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center gap-1 sm:gap-2 text-xs sm:text-sm transition-colors whitespace-nowrap"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              <span>⚔️ Battle</span>
+              <span className="hidden sm:inline">⚔️ Battle</span>
+              <span className="sm:hidden">⚔️</span>
             </button>
             <button
               onClick={() => setShowUpload(!showUpload)}
-              className="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center gap-2 text-xs sm:text-sm transition-colors"
+              className="px-2 sm:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center gap-1 sm:gap-2 text-xs sm:text-sm transition-colors whitespace-nowrap"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span>📤 Upload</span>
+              <span className="hidden sm:inline">📤 Upload</span>
+              <span className="sm:hidden">📤</span>
             </button>
           </div>
         </div>
@@ -208,30 +210,30 @@ const Dashboard = () => {
         )}
 
         {/* Stats Grid - Mobile Optimized */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
           {/* Total Decks */}
-          <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-3 sm:p-4 border-t-4 border-blue-500">
-            <p className="text-xs sm:text-sm font-medium text-gray-600">📚 Decks</p>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{decks.length}</p>
+          <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-2 sm:p-4 border-t-4 border-blue-500">
+            <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">📚 Decks</p>
+            <p className="text-xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{decks.length}</p>
           </div>
 
           {/* Total Quizzes */}
-          <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-3 sm:p-4 border-t-4 border-green-500">
-            <p className="text-xs sm:text-sm font-medium text-gray-600">📋 Quizzes</p>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{decks.length * 3}</p>
+          <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-2 sm:p-4 border-t-4 border-green-500">
+            <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">📋 Quizzes</p>
+            <p className="text-xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{decks.length * 3}</p>
           </div>
 
           {/* Study Streak - LIVE */}
-          <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-3 sm:p-4 border-t-4 border-yellow-500">
-            <p className="text-xs sm:text-sm font-medium text-gray-600">🔥 Streak</p>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{liveStreak}</p>
+          <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-2 sm:p-4 border-t-4 border-yellow-500">
+            <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">🔥 Streak</p>
+            <p className="text-xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{liveStreak}</p>
             <p className="text-xs text-gray-500 mt-1">days</p>
           </div>
 
           {/* Study Time - LIVE */}
-          <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-3 sm:p-4 border-t-4 border-purple-500">
-            <p className="text-xs sm:text-sm font-medium text-gray-600">⏱️ Study</p>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{formatStudyTime(liveStudyTime)}</p>
+          <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-2 sm:p-4 border-t-4 border-purple-500">
+            <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">⏱️ Study</p>
+            <p className="text-xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{formatStudyTime(liveStudyTime)}</p>
             <p className="text-xs text-gray-500 mt-1">today</p>
           </div>
         </div>
