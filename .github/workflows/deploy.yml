@@ -10,18 +10,6 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    # Setup Node.js
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-
   deploy:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -71,17 +59,3 @@ jobs:
       run: |
         echo "❌ Deployment failed. Check logs above."
         exit 1
-
-  notify:
-    needs: deploy
-    runs-on: ubuntu-latest
-    if: always()
-    
-    steps:
-    - name: Notify Success
-      if: needs.deploy.result == 'success'
-      run: echo "🎉 Deployment successful!"
-    
-    - name: Notify Failure
-      if: needs.deploy.result == 'failure'
-      run: echo "❌ Deployment failed - check logs"
