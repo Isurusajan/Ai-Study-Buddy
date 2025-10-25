@@ -66,12 +66,13 @@ const FileUpload = ({ onUploadSuccess }) => {
       formData.append('subject', subject);
       formData.append('description', description);
 
+      console.log('📤 Uploading file:', file.name);
+      console.log('📋 Form data fields:', { title, subject, description });
+
       // Upload file
-      const response = await api.post('/decks', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      // IMPORTANT: Do NOT set Content-Type header - let axios handle it automatically
+      // Axios will set the proper boundary for multipart/form-data
+      const response = await api.post('/decks', formData);
 
       console.log('Upload success:', response.data);
 

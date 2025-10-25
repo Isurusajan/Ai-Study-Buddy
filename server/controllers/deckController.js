@@ -71,6 +71,10 @@ exports.createDeck = async (req, res) => {
       
       try {
         uploadStream.end(file.buffer);
+      } catch (streamError) {
+        console.error('❌ Stream error:', streamError);
+        reject(streamError);
+      }
     });
 
     console.log('✅ File uploaded to Cloudinary');
