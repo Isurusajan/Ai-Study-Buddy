@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import api from '../../utils/api';
 
 const FileUpload = ({ onUploadSuccess }) => {
   const [file, setFile] = useState(null);
@@ -70,10 +69,26 @@ const FileUpload = ({ onUploadSuccess }) => {
       console.log('📋 Form data fields:', { title, subject, description });
       console.log('🔍 FormData instance:', formData instanceof FormData);
 
-      // Upload file
-      const response = await api.post('/decks', formData);
+      // Get token for authorization
+      const token = localStorage.getItem('token');
 
-      console.log('Upload success:', response.data);
+      // Use fetch API directly for file uploads (bypasses axios transformRequest issues)
+      const response = await fetch('https://aistudybuddy.duckdns.org/api/decks', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+          // DO NOT set Content-Type - let browser handle it with boundary
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload file');
+      }
+
+      const data = await response.json();
+      console.log('Upload success:', data);
 
       // Reset form
       setFile(null);
@@ -83,16 +98,14 @@ const FileUpload = ({ onUploadSuccess }) => {
 
       // Notify parent component
       if (onUploadSuccess) {
-        onUploadSuccess(response.data.deck);
+        onUploadSuccess(data.deck);
       }
 
       setLoading(false);
 
     } catch (err) {
       console.error('Upload error:', err);
-      console.error('Response data:', err.response?.data);
-      console.error('Full error object:', JSON.stringify(err, null, 2));
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to upload file';
+      const errorMessage = err.message || 'Failed to upload file';
       setError(`Upload failed: ${errorMessage}`);
       setLoading(false);
     }
