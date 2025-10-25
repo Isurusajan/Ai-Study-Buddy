@@ -10,6 +10,10 @@ const { generateSummary, generateMCQ, generateShortAnswer, generateLongAnswer } 
  */
 exports.createDeck = async (req, res) => {
   try {
+    console.log('🔍 createDeck called');
+    console.log('📋 Body:', req.body);
+    console.log('📎 File:', req.file ? `${req.file.originalname} (${req.file.size} bytes)` : 'No file');
+    
     const { title, subject, description } = req.body;
     const file = req.file;
 
