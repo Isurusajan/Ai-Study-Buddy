@@ -86,16 +86,8 @@ exports.createDeck = async (req, res) => {
     const extractedText = await extractText(file.buffer, file.mimetype);
     console.log(`✅ Extracted ${extractedText.length} characters`);
 
-    // Step 3: Generate summary using AI (optional - skip if fails)
-    let summary = null;
-    try {
-      console.log('🤖 Generating summary...');
-      summary = await generateSummary(extractedText);
-      console.log('✅ Summary generated');
-    } catch (summaryError) {
-      console.log('⚠️ Summary generation failed, continuing without it:', summaryError.message);
-      summary = 'Summary generation unavailable';
-    }
+    // Step 3: Skip auto-summary generation - user can click summary button later
+    const summary = null;
 
     // Step 4: Create deck in database
     const deck = await Deck.create({
