@@ -20,8 +20,23 @@ const {
  * All routes require authentication
  */
 
+// Wrapper to handle multer errors
+const uploadWrapper = (req, res, next) => {
+  upload.single('file')(req, res, function(err) {
+    if (err) {
+      console.error('❌ Multer error:', err.message);
+      return res.status(400).json({
+        success: false,
+        message: err.message || 'File upload failed'
+      });
+    }
+    console.log('✅ File received by multer:', req.file ? req.file.originalname : 'No file');
+    next();
+  });
+};
+
 // Create deck with file upload (uses multer middleware)
-router.post('/', protect, upload.single('file'), createDeck);
+router.post('/', protect, uploadWrapper, createDeck);
 
 // Get all decks for current user
 router.get('/', protect, getDecks);

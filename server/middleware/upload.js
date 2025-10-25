@@ -13,6 +13,8 @@ const storage = multer.memoryStorage();
 
 // File filter - only allow PDF and DOCX files
 const fileFilter = (req, file, cb) => {
+  console.log('🔍 Multer file filter - File:', file.originalname, 'MIME:', file.mimetype);
+  
   const allowedTypes = [
     'application/pdf',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -21,8 +23,10 @@ const fileFilter = (req, file, cb) => {
   ];
 
   if (allowedTypes.includes(file.mimetype)) {
+    console.log('✅ File type accepted');
     cb(null, true); // Accept file
   } else {
+    console.log('❌ File type rejected');
     cb(new Error('Invalid file type. Only PDF, DOCX, DOC, and TXT files are allowed.'), false);
   }
 };
