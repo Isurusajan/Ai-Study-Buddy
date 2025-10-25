@@ -4,7 +4,7 @@ import '../styles/homeBattle.css';
 
 const Home = () => {
   return (
-    <div className="min-h-screen relative">
+    <div className="relative w-screen overflow-x-hidden">
       {/* Animated battle background */}
       <div className="battle-background"></div>
 

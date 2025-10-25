@@ -125,7 +125,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50 w-full overflow-x-hidden">
       {/* Navigation */}
       <nav className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">

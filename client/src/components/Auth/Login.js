@@ -39,7 +39,7 @@ const Login = () => {
   return (
     <>
       <AIRobotBackground />
-      <div className="flex items-center justify-center py-12 sm:py-16 px-3 sm:px-6 lg:px-8 relative z-20">
+      <div className="min-h-screen w-screen overflow-hidden flex items-center justify-center py-12 sm:py-16 px-3 sm:px-6 lg:px-8 relative z-20">
         <div className="w-full max-w-sm space-y-6">
           {/* Header */}
           <div className="text-center space-y-2">

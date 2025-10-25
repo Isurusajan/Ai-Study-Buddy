@@ -110,7 +110,7 @@ const Quiz = () => {
   // Quiz Setup Screen
   if (!quizStarted) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="w-full bg-gray-50 py-8 overflow-x-hidden">
         <div className="max-w-2xl mx-auto px-4">
           <button
             onClick={() => navigate('/dashboard')}
@@ -197,7 +197,7 @@ const Quiz = () => {
   // Results Screen
   if (showResults) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="w-full bg-gray-50 py-8 overflow-x-hidden">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-md p-8 mb-6">
             <div className="text-center mb-8">
@@ -312,7 +312,7 @@ const Quiz = () => {
 
   // Quiz Question Screen
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="w-full bg-gray-50 py-8 overflow-x-hidden">
       <div className="max-w-3xl mx-auto px-4">
         {/* Progress Bar */}
         <div className="mb-6">
