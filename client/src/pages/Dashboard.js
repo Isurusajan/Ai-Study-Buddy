@@ -95,7 +95,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Navigation */}
       <nav className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -132,8 +132,7 @@ const Dashboard = () => {
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              <span className="hidden sm:inline">Battle</span>
-              <span className="sm:hidden">⚔️</span>
+              <span>⚔️ Battle</span>
             </button>
             <button
               onClick={() => setShowUpload(!showUpload)}
@@ -142,8 +141,7 @@ const Dashboard = () => {
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="hidden sm:inline">Upload</span>
-              <span className="sm:hidden">📤</span>
+              <span>📤 Upload</span>
             </button>
           </div>
         </div>
