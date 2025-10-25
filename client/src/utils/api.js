@@ -9,7 +9,9 @@ let apiBaseURL = '/api';
 
 // Use full URL if REACT_APP_API_URL is explicitly set
 if (process.env.REACT_APP_API_URL) {
-  apiBaseURL = `${process.env.REACT_APP_API_URL}/api`;
+  // Don't add /api suffix if the URL already ends with /api
+  const baseUrl = process.env.REACT_APP_API_URL;
+  apiBaseURL = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 }
 
 const api = axios.create({
