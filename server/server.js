@@ -124,6 +124,32 @@ app.get('/', (req, res) => {
   });
 });
 
+// Admin deployment endpoint (development only)
+if (process.env.NODE_ENV === 'development') {
+  app.post('/admin/deploy', (req, res) => {
+    const { exec } = require('child_process');
+    console.log('🚀 Deploy endpoint triggered - pulling latest code...');
+    
+    exec('cd /home/ec2-user/Ai-Study-Buddy && git pull origin main && cd server && npx pm2 restart all', 
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error('Deploy error:', error);
+          return res.status(500).json({ 
+            success: false, 
+            message: 'Deploy failed', 
+            error: error.message 
+          });
+        }
+        console.log('✅ Deploy successful');
+        res.json({ 
+          success: true, 
+          message: 'Server deployed and restarted successfully'
+        });
+      }
+    );
+  });
+}
+
 // 404 handler - catch all unmatched routes
 app.use((req, res) => {
   res.status(404).json({
