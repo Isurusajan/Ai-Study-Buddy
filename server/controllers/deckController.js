@@ -1,5 +1,6 @@
 const Deck = require('../models/Deck');
 const cloudinary = require('../config/cloudinary');
+const handleCloudinaryError = require('../config/cloudinaryErrorHandler');
 const { extractText } = require('../services/pdfService');
 const { generateSummary, generateMCQ, generateShortAnswer, generateLongAnswer } = require('../services/geminiService');
 
@@ -34,6 +35,17 @@ exports.createDeck = async (req, res) => {
 
     // Step 1: Upload file to Cloudinary with PUBLIC delivery settings
     console.log('📤 Uploading file to Cloudinary...');
+    console.log('File details:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      buffer: file.buffer ? 'Buffer present' : 'Buffer missing'
+    });
+    
+    if (!file.buffer) {
+      throw new Error('File buffer is missing');
+    }
+
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -47,6 +59,7 @@ exports.createDeck = async (req, res) => {
         (error, result) => {
           if (error) {
             console.error('❌ Cloudinary upload error:', error);
+            console.error('Cloudinary error details:', JSON.stringify(error, null, 2));
             reject(error);
           }
           else {
@@ -55,7 +68,9 @@ exports.createDeck = async (req, res) => {
           }
         }
       );
-      uploadStream.end(file.buffer);
+      
+      try {
+        uploadStream.end(file.buffer);
     });
 
     console.log('✅ File uploaded to Cloudinary');
@@ -111,10 +126,30 @@ exports.createDeck = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Deck creation error:', error);
+    
+    // Handle specific error types
+    if (error.name === 'Error' && error.message.includes('buffer')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file format or empty file'
+      });
+    }
+    
+    // Handle Cloudinary specific errors
+    if (error.http_code) {
+      const errorMessage = handleCloudinaryError(error);
+      return res.status(error.http_code).json({
+        success: false,
+        message: errorMessage
+      });
+    }
+
+    // Handle other errors
     res.status(500).json({
       success: false,
       message: 'Failed to create deck',
-      error: error.message
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };

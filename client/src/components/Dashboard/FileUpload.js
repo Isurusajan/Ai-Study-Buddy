@@ -90,7 +90,10 @@ const FileUpload = ({ onUploadSuccess }) => {
 
     } catch (err) {
       console.error('Upload error:', err);
-      setError(err.response?.data?.message || 'Failed to upload file');
+      console.error('Response data:', err.response?.data);
+      console.error('Full error object:', JSON.stringify(err, null, 2));
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to upload file';
+      setError(`Upload failed: ${errorMessage}`);
       setLoading(false);
     }
   };
