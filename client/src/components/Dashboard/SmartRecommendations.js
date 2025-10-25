@@ -16,7 +16,12 @@ const SmartRecommendations = ({ decks }) => {
       const response = await api.get('/recommendations');
       setRecommendations(response.data.recommendations || []);
     } catch (error) {
-      console.error('Error fetching recommendations:', error);
+      // 404 means backend hasn't been restarted yet with the new route
+      if (error.response?.status === 404) {
+        console.warn('⚠️ Recommendations endpoint not yet available. Backend server may need restart.');
+      } else {
+        console.error('Error fetching recommendations:', error);
+      }
       setRecommendations([]);
     } finally {
       setLoading(false);
