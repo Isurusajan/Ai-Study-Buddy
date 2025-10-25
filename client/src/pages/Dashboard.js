@@ -32,26 +32,45 @@ const Dashboard = () => {
     }
   }, [isAuthenticated, refreshUser]);
 
-  // Auto-track study time from login - updates every second
+  // Auto-track study time from login - updates every second with daily reset
   useEffect(() => {
     if (!user) return;
 
-    // Get login time from localStorage
-    const loginTime = localStorage.getItem('loginTime');
-    if (!loginTime) {
-      localStorage.setItem('loginTime', Date.now().toString());
+    // Get or initialize today's study date and session start time
+    const today = new Date().toDateString();
+    let studyDate = localStorage.getItem('studyDate');
+    let dailySessionStart = localStorage.getItem('dailySessionStart');
+
+    // If date changed, reset daily session start
+    if (studyDate !== today) {
+      localStorage.setItem('studyDate', today);
+      localStorage.setItem('dailySessionStart', Date.now().toString());
+      dailySessionStart = Date.now().toString();
+    } else if (!dailySessionStart) {
+      localStorage.setItem('dailySessionStart', Date.now().toString());
+      dailySessionStart = Date.now().toString();
     }
 
     const interval = setInterval(() => {
-      const storedLoginTime = parseInt(localStorage.getItem('loginTime') || '0');
-      const elapsedSeconds = Math.floor((Date.now() - storedLoginTime) / 1000);
-      setLiveStudyTime((user?.totalStudyTime || 0) + elapsedSeconds);
+      const currentDate = new Date().toDateString();
+      let sessionStart = parseInt(localStorage.getItem('dailySessionStart') || Date.now().toString());
+
+      // Check if day has changed since last update
+      const lastStoredDate = localStorage.getItem('studyDate');
+      if (lastStoredDate !== currentDate) {
+        localStorage.setItem('studyDate', currentDate);
+        localStorage.setItem('dailySessionStart', Date.now().toString());
+        sessionStart = Date.now();
+      }
+
+      // Calculate study time for today only
+      const elapsedSeconds = Math.floor((Date.now() - sessionStart) / 1000);
+      setLiveStudyTime(elapsedSeconds); // Only today's study time
 
       // Update streak based on current study session
       const lastStudyDate = user.lastStudyDate ? new Date(user.lastStudyDate).toDateString() : null;
-      const today = new Date().toDateString();
 
-      if (lastStudyDate === today) {
+      if (lastStudyDate === currentDate) {
         setLiveStreak(user.studyStreak || 0);
       } else {
         setLiveStreak((user.studyStreak || 0) + 1);
@@ -90,12 +109,23 @@ const Dashboard = () => {
     navigate(`/battle-arena?room=${roomCode.trim().toUpperCase()}`);
   };
 
+  // Format study time to hours and minutes
+  const formatStudyTime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  };
+
   if (!user || loading) {
     return <FullPageLoader message="Loading your dashboard..." />;
   }
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50 pb-6 sm:pb-8">
       {/* Navigation */}
       <nav className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -201,8 +231,8 @@ const Dashboard = () => {
           {/* Study Time - LIVE */}
           <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-3 sm:p-4 border-t-4 border-purple-500">
             <p className="text-xs sm:text-sm font-medium text-gray-600">⏱️ Study</p>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{Math.floor(liveStudyTime / 60)}</p>
-            <p className="text-xs text-gray-500 mt-1">min</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{formatStudyTime(liveStudyTime)}</p>
+            <p className="text-xs text-gray-500 mt-1">today</p>
           </div>
         </div>
 

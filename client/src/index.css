@@ -28,9 +28,23 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 640px) {
+  body, html {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
 }
