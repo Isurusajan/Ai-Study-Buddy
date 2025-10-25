@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import AIRobotBackground from '../Common/AIRobotBackground';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -36,19 +37,21 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-4xl font-extrabold text-gray-900">
-            AI Study Buddy
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Welcome back! Sign in to continue learning.
-          </p>
-        </div>
+    <>
+      <AIRobotBackground />
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-20">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <h2 className="mt-6 text-center text-4xl font-extrabold text-white drop-shadow-lg">
+              AI Study Buddy
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-100 drop-shadow">
+              Welcome back! Sign in to continue learning.
+            </p>
+          </div>
 
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="bg-white/95 backdrop-blur rounded-lg shadow-2xl p-8">
+            <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
                 {error}
@@ -107,10 +110,11 @@ const Login = () => {
                 </Link>
               </p>
             </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
