@@ -6,7 +6,7 @@ import FileUpload from '../components/Dashboard/FileUpload';
 import DeckCard from '../components/Dashboard/DeckCard';
 import { FullPageLoader } from '../components/Loading/LoadingSpinner';
 
-// Completely redesigned Dashboard component with modern mobile-responsive design
+// Modern sleek Dashboard inspired by the provided design
 
 const Dashboard = () => {
   const { user, isAuthenticated, logout, refreshUser } = useAuth();
@@ -127,139 +127,114 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 w-full overflow-x-hidden pb-8">
-      {/* Top Navigation Bar */}
-      <nav className="bg-white shadow-lg sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 sm:h-20">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="text-3xl sm:text-4xl">🤖</div>
-              <div>
-                <h1 className="text-base sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Study Buddy
-                </h1>
-                <p className="text-xs text-gray-500 hidden sm:block">Welcome back!</p>
-              </div>
+    <div className="bg-gradient-to-br from-purple-600 to-purple-800 min-h-screen pb-24 w-full overflow-x-hidden">
+      {/* Header */}
+      <div className="bg-white/95 backdrop-blur-lg sticky top-0 z-50 shadow-lg">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          {/* User Info */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center text-white font-bold text-lg">
+              {user.name.charAt(0)}
             </div>
-
-            {/* User Section */}
-            <div className="flex items-center gap-3 sm:gap-6">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                <p className="text-xs text-gray-500">Premium Member</p>
-              </div>
-              <button
-                onClick={logout}
-                className="px-3 sm:px-6 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-medium transition-all transform hover:scale-105 text-xs sm:text-sm shadow-md"
-              >
-                Logout
-              </button>
-            </div>
+            <span className="font-semibold text-gray-900 hidden sm:inline text-sm">{user.name.split(' ')[0]}</span>
           </div>
+          {/* Logout Button */}
+          <button
+            onClick={logout}
+            className="bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white px-4 py-2 rounded-full font-semibold text-sm transition-all transform hover:scale-105"
+          >
+            Logout
+          </button>
         </div>
-      </nav>
+      </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
         {/* Welcome Section */}
-        <div className="mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">
-            Welcome back, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user.name.split(' ')[0]}</span>! 👋
-          </h2>
-          <p className="text-gray-600 text-sm sm:text-base">Keep up your learning streak and master new subjects</p>
+        <div className="text-white mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome back! 👋</h1>
+          <p className="text-white/80 text-xs sm:text-sm">Ready to continue your learning journey?</p>
         </div>
 
-        {/* Quick Action Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
-          <button
-            onClick={() => setShowUpload(!showUpload)}
-            className="bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex flex-col items-center justify-center gap-2"
-          >
-            <span className="text-3xl sm:text-4xl">📤</span>
-            <span className="font-semibold text-xs sm:text-sm">Upload</span>
-          </button>
-
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <button
             onClick={() => setShowJoinBattle(!showJoinBattle)}
-            className="bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex flex-col items-center justify-center gap-2"
+            className="flex-1 py-3 px-4 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white rounded-2xl font-semibold text-base sm:text-lg flex items-center justify-center gap-2 transition-all transform hover:translate-y-[-2px] hover:shadow-lg"
           >
-            <span className="text-3xl sm:text-4xl">⚔️</span>
-            <span className="font-semibold text-xs sm:text-sm">Battle</span>
+            <span>⚔️</span>
+            <span>Battle Mode</span>
           </button>
-
           <button
-            onClick={() => navigate('/quiz')}
-            className="bg-gradient-to-br from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex flex-col items-center justify-center gap-2"
+            onClick={() => setShowUpload(!showUpload)}
+            className="flex-1 py-3 px-4 bg-white hover:bg-gray-50 text-purple-600 hover:text-purple-700 rounded-2xl font-semibold text-base sm:text-lg flex items-center justify-center gap-2 transition-all transform hover:translate-y-[-2px] hover:shadow-lg"
           >
-            <span className="text-3xl sm:text-4xl">📝</span>
-            <span className="font-semibold text-xs sm:text-sm">Quiz</span>
+            <span>📤</span>
+            <span>Upload</span>
           </button>
         </div>
 
-        {/* Stats Cards - Beautiful Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          {/* Study Time Card */}
-          <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-all border-l-4 border-blue-500 group cursor-default">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl sm:text-3xl">⏱️</span>
-              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">Today</span>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* Decks Stat */}
+          <div className="bg-white/95 backdrop-blur-lg rounded-2xl p-5 shadow-md hover:shadow-lg hover:translate-y-[-4px] transition-all">
+            <div className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-3">
+              <span className="text-2xl">📚</span>
+              <span>Decks</span>
             </div>
-            <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1">Study Time</p>
-            <p className="text-xl sm:text-3xl font-bold text-gray-900">{formatStudyTime(liveStudyTime)}</p>
+            <div className="text-4xl font-bold text-gray-900">{decks.length}</div>
+            <div className="text-xs text-gray-600 mt-2">Total collections</div>
           </div>
 
-          {/* Streak Card */}
-          <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-all border-l-4 border-yellow-500 group cursor-default">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl sm:text-3xl">🔥</span>
-              <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-semibold">Active</span>
+          {/* Quizzes Stat */}
+          <div className="bg-white/95 backdrop-blur-lg rounded-2xl p-5 shadow-md hover:shadow-lg hover:translate-y-[-4px] transition-all">
+            <div className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-3">
+              <span className="text-2xl">📝</span>
+              <span>Quizzes</span>
             </div>
-            <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1">Study Streak</p>
-            <p className="text-xl sm:text-3xl font-bold text-gray-900">{liveStreak} <span className="text-sm text-gray-500">days</span></p>
+            <div className="text-4xl font-bold text-gray-900">{decks.length * 3}</div>
+            <div className="text-xs text-gray-600 mt-2">Available</div>
           </div>
 
-          {/* Decks Card */}
-          <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-all border-l-4 border-green-500 group cursor-default">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl sm:text-3xl">📚</span>
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">Total</span>
+          {/* Streak Stat */}
+          <div className="bg-white/95 backdrop-blur-lg rounded-2xl p-5 shadow-md hover:shadow-lg hover:translate-y-[-4px] transition-all">
+            <div className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-3">
+              <span className="text-2xl">🔥</span>
+              <span>Streak</span>
             </div>
-            <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1">Decks</p>
-            <p className="text-xl sm:text-3xl font-bold text-gray-900">{decks.length}</p>
+            <div className="text-4xl font-bold text-gray-900">{liveStreak}</div>
+            <div className="text-xs text-gray-600 mt-2">days strong</div>
           </div>
 
-          {/* Quizzes Card */}
-          <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-all border-l-4 border-purple-500 group cursor-default">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl sm:text-3xl">📋</span>
-              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold">Available</span>
+          {/* Study Time Stat */}
+          <div className="bg-white/95 backdrop-blur-lg rounded-2xl p-5 shadow-md hover:shadow-lg hover:translate-y-[-4px] transition-all">
+            <div className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-3">
+              <span className="text-2xl">⏱️</span>
+              <span>Study Time</span>
             </div>
-            <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1">Quizzes</p>
-            <p className="text-xl sm:text-3xl font-bold text-gray-900">{decks.length * 3}</p>
+            <div className="text-4xl font-bold text-gray-900">{formatStudyTime(liveStudyTime)}</div>
+            <div className="text-xs text-gray-600 mt-2">today</div>
           </div>
         </div>
 
         {/* Join Battle Section */}
         {showJoinBattle && (
-          <div className="mb-8 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl shadow-md p-5 sm:p-8 border-2 border-purple-200">
-            <h3 className="text-lg sm:text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-              🎮 Join a Battle
-            </h3>
-            <p className="text-gray-700 text-sm sm:text-base mb-4">Enter a room code to join an exciting multiplayer battle!</p>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="bg-white/95 backdrop-blur-lg rounded-2xl p-6 shadow-lg mb-6">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">🎮 Join a Battle</h3>
+            <p className="text-gray-700 text-sm mb-4">Enter a room code to join an exciting multiplayer battle!</p>
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
                 placeholder="Enter room code"
                 value={roomCode}
                 onChange={(e) => setRoomCode(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleJoinBattle()}
-                className="flex-1 px-4 py-3 text-base border-2 border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all"
+                className="flex-1 px-4 py-3 border-2 border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-base"
               />
               <button
                 onClick={handleJoinBattle}
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg text-base"
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg text-base whitespace-nowrap"
               >
                 Join Battle
               </button>
@@ -269,54 +244,150 @@ const Dashboard = () => {
 
         {/* File Upload Section */}
         {showUpload && (
-          <div className="mb-8">
+          <div className="mb-6">
             <FileUpload onUploadSuccess={handleUploadSuccess} />
           </div>
         )}
 
         {/* Decks Section */}
-        <div>
+        <div className="bg-white/95 backdrop-blur-lg rounded-3xl p-6 shadow-xl">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-              📚 Your Study Decks
-              <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-semibold">{decks.length}</span>
-            </h3>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
+              <span>📚</span>
+              Your Study Decks
+            </h2>
           </div>
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600"></div>
               <p className="mt-4 text-gray-600 font-medium">Loading your decks...</p>
             </div>
           ) : decks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="space-y-4">
               {decks.map((deck) => (
-                <DeckCard
-                  key={deck._id}
-                  deck={deck}
-                  onDelete={handleDeleteDeck}
-                  onGenerateFlashcards={() => fetchDecks()}
-                />
+                <div key={deck._id} className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group">
+                  {/* Background Glow */}
+                  <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:blur-2xl transition-all"></div>
+                  
+                  {/* Content */}
+                  <div className="relative z-10">
+                    <span className="inline-block bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold mb-3">
+                      {deck.category || 'GENERAL'}
+                    </span>
+                    
+                    <h3 className="text-2xl sm:text-3xl font-bold mb-3">{deck.title}</h3>
+                    
+                    <div className="flex gap-4 mb-4 text-sm">
+                      <div className="flex items-center gap-1">
+                        <span>📄</span>
+                        <span>{deck.category || 'General'}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span>📅</span>
+                        <span>{new Date(deck.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden mb-5">
+                      <div className="h-full bg-white rounded-full" style={{ width: '65%' }}></div>
+                    </div>
+
+                    {/* Deck Actions Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      <button
+                        onClick={() => navigate(`/study/${deck._id}`)}
+                        className="col-span-2 sm:col-span-3 bg-white text-purple-600 hover:bg-gray-100 py-2 px-4 rounded-xl font-semibold text-sm transition-all transform hover:scale-102"
+                      >
+                        📖 Study Now
+                      </button>
+                      <button
+                        onClick={() => navigate(`/pdf-summary/${deck._id}`)}
+                        className="bg-white/20 border border-white/30 hover:bg-white/30 text-white py-2 px-3 rounded-lg font-semibold text-xs transition-all"
+                      >
+                        📄 Summary
+                      </button>
+                      <button
+                        onClick={() => navigate(`/quiz/${deck._id}`)}
+                        className="bg-white/20 border border-white/30 hover:bg-white/30 text-white py-2 px-3 rounded-lg font-semibold text-xs transition-all"
+                      >
+                        ❓ MCQ Quiz
+                      </button>
+                      <button
+                        onClick={() => navigate(`/short-answer/${deck._id}`)}
+                        className="bg-white/20 border border-white/30 hover:bg-white/30 text-white py-2 px-3 rounded-lg font-semibold text-xs transition-all"
+                      >
+                        ✍️ Short Q
+                      </button>
+                      <button
+                        onClick={() => navigate(`/long-answer/${deck._id}`)}
+                        className="bg-white/20 border border-white/30 hover:bg-white/30 text-white py-2 px-3 rounded-lg font-semibold text-xs transition-all"
+                      >
+                        📝 Long Q
+                      </button>
+                      <button
+                        onClick={() => navigate(`/ask-question/${deck._id}`)}
+                        className="bg-white/20 border border-white/30 hover:bg-white/30 text-white py-2 px-3 rounded-lg font-semibold text-xs transition-all"
+                      >
+                        💬 Ask AI
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => handleDeleteDeck(deck._id)}
+                    className="absolute top-4 right-4 bg-red-500/80 hover:bg-red-600 text-white p-2 rounded-full text-sm transition-all"
+                    title="Delete deck"
+                  >
+                    🗑️
+                  </button>
+                </div>
               ))}
             </div>
           ) : (
-            /* Empty State - Beautiful Design */
-            <div className="bg-white rounded-2xl shadow-lg p-8 sm:p-12 text-center border-2 border-dashed border-blue-200">
-              <div className="text-6xl sm:text-7xl mb-4 inline-block">📚</div>
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">No study decks yet</h3>
-              <p className="text-gray-600 text-sm sm:text-base mb-6 max-w-md mx-auto">
-                Get started by uploading your first document. You can upload PDFs, images, or text files to create flashcards instantly!
+            /* Empty State */
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📚</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No study decks yet</h3>
+              <p className="text-gray-600 text-sm mb-6 max-w-md mx-auto">
+                Get started by uploading your first document. You can upload PDFs, images, or text files!
               </p>
               <button
                 onClick={() => setShowUpload(true)}
-                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-base"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
               >
                 <span>📤</span>
-                Start by Uploading a Document
+                Upload Your First Document
               </button>
             </div>
           )}
         </div>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200 px-4 py-3 flex justify-around">
+        <button className="flex flex-col items-center gap-1 text-purple-600 cursor-pointer hover:text-purple-700 transition">
+          <span className="text-2xl">🏠</span>
+          <span className="text-xs font-semibold">Home</span>
+        </button>
+        <button onClick={() => navigate('/dashboard')} className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer transition">
+          <span className="text-2xl">📚</span>
+          <span className="text-xs font-semibold">Decks</span>
+        </button>
+        <button onClick={() => setShowJoinBattle(true)} className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer transition">
+          <span className="text-2xl">⚔️</span>
+          <span className="text-xs font-semibold">Battle</span>
+        </button>
+        <button className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer transition">
+          <span className="text-2xl">📊</span>
+          <span className="text-xs font-semibold">Stats</span>
+        </button>
+        <button onClick={() => navigate('/profile')} className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer transition">
+          <span className="text-2xl">👤</span>
+          <span className="text-xs font-semibold">Profile</span>
+        </button>
       </div>
     </div>
   );
