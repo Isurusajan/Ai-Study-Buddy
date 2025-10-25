@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { InlineSpinner } from '../components/Loading/LoadingSpinner';
@@ -9,15 +9,11 @@ const PDFSummary = () => {
   const navigate = useNavigate();
   const [deck, setDeck] = useState(null);
   const [summary, setSummary] = useState('');
-  const [level, setLevel] = useState('medium');
+  const [summaryType, setSummaryType] = useState('structured');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchDeck();
-  }, [deckId]);
-
-  const fetchDeck = async () => {
+  const fetchDeck = useCallback(async () => {
     try {
       const response = await api.get(`/decks/${deckId}`);
       setDeck(response.data.deck);
@@ -28,13 +24,19 @@ const PDFSummary = () => {
       setError('Failed to load deck');
       console.error(err);
     }
-  };
+  }, [deckId]);
+
+  useEffect(() => {
+    if (deckId) {
+      fetchDeck();
+    }
+  }, [deckId, fetchDeck]);
 
   const generateSummary = async () => {
     setLoading(true);
     setError('');
     try {
-      const response = await api.post(`/decks/${deckId}/summary`, { level });
+      const response = await api.post(`/decks/${deckId}/summary`, { level: summaryType });
       setSummary(response.data.summary);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to generate summary');
@@ -47,7 +49,7 @@ const PDFSummary = () => {
   const downloadSummary = async () => {
     try {
       const response = await api.get(
-        `/decks/${deckId}/summary/download?level=${level}`,
+        `/decks/${deckId}/summary/download?level=${summaryType}`,
         {
           responseType: 'blob'
         }
@@ -57,7 +59,7 @@ const PDFSummary = () => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${deck?.title || 'summary'}_${level}.txt`);
+      link.setAttribute('download', `${deck?.title || 'summary'}_${summaryType}.txt`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -91,24 +93,33 @@ const PDFSummary = () => {
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Summary Detail Level
+                📝 Summary Type & Depth
               </label>
-              <select
-                value={level}
-                onChange={(e) => setLevel(e.target.value)}
-                className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="brief">Brief (1-2 pages)</option>
-                <option value="medium">Medium (3-5 pages)</option>
-                <option value="detailed">Detailed (6-10 pages)</option>
-              </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div>
+                  <select
+                    value={summaryType}
+                    onChange={(e) => setSummaryType(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="concise">⚡ Concise - Quick read (1-2 pages)</option>
+                    <option value="bullets">🎯 Bullet Points - Key takeaways (1-2 pages)</option>
+                    <option value="structured">📚 Structured - Well-organized (2-4 pages)</option>
+                    <option value="narrative">📖 Narrative - Full story (3-5 pages)</option>
+                    <option value="comprehensive">🔬 Comprehensive - Complete coverage (5+ pages)</option>
+                  </select>
+                </div>
+                <p className="text-xs text-gray-600 self-end italic">
+                  Page count auto-adjusts based on document size for optimal quality
+                </p>
+              </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 w-full md:w-auto">
               <button
                 onClick={generateSummary}
                 disabled={loading}
-                className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center gap-2"
+                className="flex-1 md:flex-none px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -116,14 +127,14 @@ const PDFSummary = () => {
                     Generating...
                   </>
                 ) : (
-                  'Generate Summary'
+                  '✨ Generate'
                 )}
               </button>
 
               {summary && (
                 <button
                   onClick={downloadSummary}
-                  className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition flex items-center gap-2"
+                  className="flex-1 md:flex-none px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -146,7 +157,7 @@ const PDFSummary = () => {
         {summary && (
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Summary ({level.charAt(0).toUpperCase() + level.slice(1)})
+              Summary ({summaryType.charAt(0).toUpperCase() + summaryType.slice(1)})
             </h2>
             <div className="prose max-w-none">
               <div

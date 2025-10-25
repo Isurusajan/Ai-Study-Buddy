@@ -14,67 +14,126 @@ function getModel() {
 }
 
 /**
- * Generate summary from text with page-based detail levels
+ * Calculate dynamic pages based on content size
+ * @param {Number} textLength - Length of the extracted text
+ * @param {String} type - Summary type
+ * @returns {Object} - Pages and words estimate
+ */
+function calculateDynamicPages(textLength, type) {
+  // Estimate: ~250 words per page in a PDF
+  const contentPages = Math.ceil(textLength / 2500); // Rough estimate of pages in original
+  
+  const pageRanges = {
+    concise: { min: Math.max(1, contentPages * 0.3), max: Math.max(2, contentPages * 0.4) },
+    bullets: { min: Math.max(1, contentPages * 0.35), max: Math.max(2, contentPages * 0.45) },
+    structured: { min: Math.max(2, contentPages * 0.4), max: Math.max(4, contentPages * 0.6) },
+    narrative: { min: Math.max(3, contentPages * 0.5), max: Math.max(5, contentPages * 0.8) },
+    comprehensive: { min: Math.max(5, contentPages * 0.7), max: Math.max(10, contentPages * 1.0) }
+  };
+
+  const range = pageRanges[type] || pageRanges.structured;
+  const avgWords = ((range.min + range.max) / 2) * 300; // ~300 words per page
+  
+  return {
+    minPages: Math.round(range.min),
+    maxPages: Math.round(range.max),
+    estimatedWords: Math.round(avgWords)
+  };
+}
+
+/**
+ * Generate summary from text with adaptive detail levels and summary types
  * @param {String} text - Extracted text from document
- * @param {String} level - Detail level: 'brief', 'medium', 'detailed'
+ * @param {String} level - Detail level: 'concise', 'bullets', 'structured', 'narrative', 'comprehensive'
  * @returns {String} - Summary text
  */
-exports.generateSummary = async (text, level = 'medium') => {
+exports.generateSummary = async (text, level = 'structured') => {
   try {
-    const limitedText = text.substring(0, 20000);
+    // Use full text (Gemini can handle larger contexts in 2.5-flash)
+    const limitedText = text.substring(0, 30000);
+    const pageInfo = calculateDynamicPages(limitedText.length, level);
 
     const levelPrompts = {
-      brief: `Create a concise summary of the following text that fits on 1-2 pages (approximately 300-500 words).
+      concise: `Create a concise, quick-reference summary of the following text that fits on ${pageInfo.minPages}-${pageInfo.maxPages} pages (approximately ${pageInfo.estimatedWords} words).
 
-Include:
-- Main topic overview (2-3 sentences)
-- Key points (5-7 bullet points)
-- Brief conclusion (1-2 sentences)
-
-Text:
-${limitedText}
-
-Format the summary in clear paragraphs and bullet points.`,
-
-      medium: `Create a comprehensive summary of the following text that spans 3-5 pages (approximately 800-1200 words).
-
-Include:
-- Introduction: Overview of the topic and its importance (1 paragraph)
-- Main Concepts: Detailed explanation of key concepts (organized by subtopics with bullet points)
-- Important Details: Supporting information, examples, and connections between ideas
-- Summary: Recap of main takeaways (1 paragraph)
+Focus on:
+- Topic overview (1-2 sentences)
+- Top 5-7 key takeaways (bullet points)
+- Brief conclusion (1 sentence)
 
 Text:
 ${limitedText}
 
-Format the response with clear headings, paragraphs, and bullet points using markdown.`,
+Format with clear sections and bullet points. Be direct and skip non-essential details.`,
 
-      detailed: `Create an extensive, detailed summary of the following text that spans 6-10 pages (approximately 1500-2500 words).
+      bullets: `Create a bullet-point summary of the following text that spans ${pageInfo.minPages}-${pageInfo.maxPages} pages (approximately ${pageInfo.estimatedWords} words).
+
+Structure as:
+- **Overview**: 2-3 sentence summary of what this covers
+- **Key Points**: 10-15 main bullet points organized by topic
+- **Important Notes**: 3-5 critical takeaways to remember
+
+Text:
+${limitedText}
+
+Format entirely in bullet points with clear topic headers. Make it scannable.`,
+
+      structured: `Create a well-structured summary of the following text that spans ${pageInfo.minPages}-${pageInfo.maxPages} pages (approximately ${pageInfo.estimatedWords} words).
+
+Include:
+- **Introduction**: Overview and context (1 paragraph)
+- **Main Sections**: Break content into 4-6 logical topics with explanations
+- **Key Concepts**: Important ideas and their definitions
+- **Practical Applications**: How these concepts apply in practice
+- **Summary**: Recap of main points (1 paragraph)
+
+Text:
+${limitedText}
+
+Use markdown formatting with clear headings (##, ###), paragraphs, and bullet points.`,
+
+      narrative: `Create a comprehensive narrative summary of the following text that spans ${pageInfo.minPages}-${pageInfo.maxPages} pages (approximately ${pageInfo.estimatedWords} words).
+
+Structure as:
+- **Executive Overview**: High-level summary (1-2 paragraphs)
+- **Background & Context**: Setting the stage (1-2 paragraphs)
+- **Main Content**: Detailed explanation of concepts, ideas, and their interconnections (multiple sections)
+- **Real-world Implications**: How this applies to real situations
+- **Key Takeaways**: Memorable summary points
+- **Conclusion**: Final thoughts and broader significance (1-2 paragraphs)
+
+Text:
+${limitedText}
+
+Write in flowing paragraphs that tell the story of the content. Use markdown for readability.`,
+
+      comprehensive: `Create a comprehensive, detailed summary of the following text that spans ${pageInfo.minPages}-${pageInfo.maxPages} pages (approximately ${pageInfo.estimatedWords} words).
 
 Include:
 - **Executive Summary**: High-level overview (1 paragraph)
-- **Introduction**: Context, background, and significance (2-3 paragraphs)
-- **Main Content**:
-  - Break down into major sections/topics
-  - Provide detailed explanations for each concept
-  - Include examples, applications, and implications
-  - Discuss relationships between different ideas
-- **Key Takeaways**: Important points to remember (bullet points)
-- **Conclusion**: Summary and broader implications (2 paragraphs)
-- **Additional Notes**: Any supplementary information or considerations
+- **Introduction**: Full context, background, and significance (2-3 paragraphs)
+- **Detailed Content**:
+  - Organize into major themes/sections with detailed explanations
+  - Include examples, case studies, and practical applications
+  - Explain relationships and connections between concepts
+  - Add supporting details and nuances
+- **Analysis & Interpretation**: Critical analysis of key points
+- **Key Takeaways**: Numbered list of important concepts
+- **Conclusion**: Summary and broader implications (2-3 paragraphs)
+- **Study Notes**: Additional context and resources to explore
 
 Text:
 ${limitedText}
 
-Format the response with comprehensive markdown formatting including headings (##, ###), paragraphs, bullet points, and numbered lists where appropriate.`
+Format with comprehensive markdown including headings (##, ###, ####), paragraphs, bullet points, numbered lists, and emphasis where appropriate.`
     };
 
-    const prompt = levelPrompts[level] || levelPrompts.medium;
+    const prompt = levelPrompts[level] || levelPrompts.structured;
     const model = getModel();
     const result = await model.generateContent(prompt);
     const summary = result.response.text();
 
-    console.log(`✅ Generated ${level} summary`);
+    console.log(`✅ Generated ${level} summary (${pageInfo.minPages}-${pageInfo.maxPages} pages, ~${pageInfo.estimatedWords} words)`);
     return summary;
 
   } catch (error) {

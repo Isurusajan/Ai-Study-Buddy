@@ -14,6 +14,7 @@ const {
   generateLongAnswerQuestions,
   askQuestion
 } = require('../controllers/deckController');
+const { getRecommendations } = require('../controllers/recommendationController');
 
 /**
  * Deck Routes
@@ -141,5 +142,8 @@ router.get('/:id/pdf-proxy', async (req, res) => {
     res.status(500).json({ error: 'Failed to load PDF' });
   }
 });
+
+// Get smart recommendations based on quiz performance
+router.get('/recommendations', protect, getRecommendations);
 
 module.exports = router;
