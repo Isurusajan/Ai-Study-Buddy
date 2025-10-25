@@ -97,7 +97,8 @@ jobs:
         
         # Start backend
         echo "🚀 Starting backend..."
-        pm2 start "npm run dev" --name "backend" --cwd "$(pwd)" || pm2 restart backend
+        # pm2 start "npm run dev" --name "backend" --cwd "$(pwd)" || pm2 restart backend
+        # NOTE: Backend managed separately to prevent auto-restart conflicts
         
         # Build and serve frontend
         echo "📦 Installing frontend dependencies..."
