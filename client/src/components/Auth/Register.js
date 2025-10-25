@@ -53,7 +53,7 @@ const Register = () => {
   return (
     <>
       <AIRobotBackground />
-      <div className="flex items-center justify-center py-8 sm:py-12 px-3 sm:px-6 lg:px-8 relative z-20 min-h-screen sm:min-h-screen">
+      <div className="flex items-center justify-center py-12 sm:py-16 px-3 sm:px-6 lg:px-8 relative z-20">
         <div className="w-full max-w-sm space-y-6">
           {/* Header */}
           <div className="text-center space-y-2">

@@ -128,27 +128,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Call to Action */}
-          <div className="mt-24 bg-white/10 backdrop-blur-md p-12 rounded-lg shadow-lg border border-white/20">
-            <h3 className="text-3xl font-bold text-white text-center mb-6">Ready to Transform Your Learning?</h3>
-            <p className="text-white/90 text-center text-lg mb-8">
-              Join thousands of students using AI Study Buddy to master their subjects faster and smarter.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-              <Link
-                to="/register"
-                className="px-6 sm:px-8 py-2 sm:py-3 rounded-md text-sm sm:text-base font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 text-center"
-              >
-                Start Free Trial
-              </Link>
-              <Link
-                to="/login"
-                className="px-6 sm:px-8 py-2 sm:py-3 rounded-md text-sm sm:text-base font-medium text-white bg-white/20 hover:bg-white/30 shadow-lg backdrop-blur-md border border-white/30 transition-all transform hover:scale-105 text-center"
-              >
-                Sign In
-              </Link>
-            </div>
-          </div>
+          {/* Bottom call-to-action removed per design request (keep hero CTAs only) */}
         </div>
       </div>
     </div>
