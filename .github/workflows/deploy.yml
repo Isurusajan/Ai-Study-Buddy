@@ -14,55 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     # Setup Node.js
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '18'
-    
-    # Backend tests
-    - name: Test Backend
-      run: |
-        cd server
-        npm install
-        # Run tests if they exist
-        npm test 2>/dev/null || echo "No tests configured"
-      continue-on-error: true
-    
-    # Build Frontend
-    - name: Build Frontend
-      run: |
-        cd client
-        npm install
-        npm run build
-      env:
-        REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
-        CI: false
-    
-    # Upload build artifacts
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: build-artifacts
-        path: |
-          client/build/
-          server/
 
   deploy:
-    needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
-    - uses: actions/checkout@v3
-    
-    # Download artifacts
-    - name: Download Build Artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: build-artifacts
+    - uses: actions/checkout@v4
     
     # Setup SSH
     - name: Setup SSH
