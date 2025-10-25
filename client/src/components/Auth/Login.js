@@ -39,18 +39,18 @@ const Login = () => {
   return (
     <>
       <AIRobotBackground />
-      <div className="min-h-screen flex items-center justify-end py-12 px-4 sm:px-6 lg:px-8 relative z-20">
-        <div className="max-w-md w-full space-y-8 mr-12">
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-20">
+        <div className="max-w-md w-full space-y-8">
           <div>
-            <h2 className="mt-6 text-center text-4xl font-extrabold text-white drop-shadow-lg">
+            <h2 className="mt-6 text-center text-3xl sm:text-4xl font-extrabold text-blue-600">
               AI Study Buddy
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-100 drop-shadow">
+            <p className="mt-2 text-center text-sm text-gray-700">
               Welcome back! Sign in to continue learning.
             </p>
           </div>
 
-          <div className="bg-white/95 backdrop-blur rounded-lg shadow-2xl p-8">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 border border-blue-100">
             <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
