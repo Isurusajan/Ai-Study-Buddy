@@ -113,14 +113,6 @@ exports.createDeck = async (req, res) => {
       error: error.message
     });
   }
-};  } catch (error) {
-    console.error('Create deck error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create deck',
-      error: error.message
-    });
-  }
 };
 
 /**
