@@ -154,16 +154,16 @@ const Dashboard = () => {
             <h2 className="text-lg sm:text-3xl font-bold text-gray-900 truncate">Dashboard</h2>
             <p className="mt-0.5 text-xs sm:text-sm text-gray-600">Track progress & manage materials</p>
           </div>
-          <div className="flex gap-1 sm:gap-2 flex-wrap flex-shrink-0">
+          <div className="flex gap-2 sm:gap-2 flex-wrap flex-shrink-0 w-full sm:w-auto">
             <button
               onClick={() => setShowJoinBattle(!showJoinBattle)}
-              className="px-2 sm:px-4 py-1.5 sm:py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center gap-1 text-xs sm:text-sm transition-colors"
+              className="flex-1 sm:flex-none px-4 sm:px-4 py-3 sm:py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center justify-center gap-2 text-sm sm:text-sm transition-colors"
             >
               ⚔️ Battle
             </button>
             <button
               onClick={() => setShowUpload(!showUpload)}
-              className="px-2 sm:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center gap-1 text-xs sm:text-sm transition-colors"
+              className="flex-1 sm:flex-none px-4 sm:px-4 py-3 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center justify-center gap-2 text-sm sm:text-sm transition-colors"
             >
               📤 Upload
             </button>
