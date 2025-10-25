@@ -34,7 +34,7 @@ if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
 // Initialize Socket.io with CORS configuration
 const io = socketIO(server, {
   cors: {
-    origin: 'https://main.d1dg86wxbzr6zt.amplifyapp.com',
+    origin: ['https://main.d1dg86wxbzr6zt.amplifyapp.com', 'https://aistudybuddy.duckdns.org'],
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true
   },
@@ -55,12 +55,13 @@ app.use(cors({
     // Allow specific origins
     const allowedOrigins = [
       'https://main.d1dg86wxbzr6zt.amplifyapp.com',
+      'https://aistudybuddy.duckdns.org',
       'http://localhost:3000',
       'http://localhost:5000',
       'https://localhost:5000'
     ];
     
-    // Allow requests with no origin (like mobile apps)
+    // Allow requests with no origin (like mobile apps or direct API calls)
     if (!origin) {
       return callback(null, true);
     }
@@ -73,7 +74,8 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 }));
 
 // Handle preflight requests
