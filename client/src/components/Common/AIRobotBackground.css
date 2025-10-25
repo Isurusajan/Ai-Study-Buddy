@@ -64,11 +64,11 @@
 /* Main robot SVG */
 .robot {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 40%;
+  left: 10%;
   transform: translate(-50%, -50%);
-  width: 280px;
-  height: 380px;
+  width: 400px;
+  height: 540px;
   z-index: 10;
   animation: robotFloat 4s ease-in-out infinite;
 }
@@ -81,11 +81,11 @@
 /* Robot glow */
 .robot-glow {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 40%;
+  left: 10%;
   transform: translate(-50%, -50%);
-  width: 350px;
-  height: 450px;
+  width: 500px;
+  height: 640px;
   background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
   border-radius: 50%;
   animation: robotGlow 3s ease-in-out infinite;
@@ -252,13 +252,17 @@
 /* Responsive scaling for mobile/tablet */
 @media (max-width: 768px) {
   .robot {
-    width: 200px;
-    height: 270px;
+    width: 280px;
+    height: 380px;
+    top: 50%;
+    left: 50%;
   }
 
   .robot-glow {
-    width: 250px;
-    height: 320px;
+    width: 350px;
+    height: 450px;
+    top: 50%;
+    left: 50%;
   }
 
   .particle {
@@ -275,12 +279,16 @@
   .robot {
     width: 140px;
     height: 190px;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%) scale(0.6);
   }
 
   .robot-glow {
     width: 180px;
     height: 240px;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%) scale(0.6);
   }
 

@@ -134,3 +134,114 @@ exports.getMe = async (req, res) => {
     });
   }
 };
+
+/**
+ * @desc    Start a study session
+ * @route   POST /api/auth/study-session-start
+ * @access  Private (requires authentication)
+ */
+exports.startStudySession = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Record study session start
+    res.status(200).json({
+      success: true,
+      message: 'Study session started',
+      sessionStart: new Date()
+    });
+  } catch (error) {
+    console.error('Start study session error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during study session start',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    End a study session and update study time/streak
+ * @route   POST /api/auth/study-session-end
+ * @access  Private (requires authentication)
+ */
+exports.endStudySession = async (req, res) => {
+  try {
+    const { sessionDuration } = req.body; // Duration in seconds
+
+    if (!sessionDuration || sessionDuration <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid session duration'
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update total study time
+    user.totalStudyTime = (user.totalStudyTime || 0) + sessionDuration;
+
+    // Update study streak
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const lastStudyDate = user.lastStudyDate ? new Date(user.lastStudyDate) : null;
+    if (lastStudyDate) {
+      lastStudyDate.setHours(0, 0, 0, 0);
+    }
+
+    const todayTime = today.getTime();
+    const lastStudyTime = lastStudyDate ? lastStudyDate.getTime() : 0;
+
+    if (lastStudyTime === todayTime) {
+      // Already studied today, keep same streak
+    } else if (lastStudyTime === todayTime - 86400000) {
+      // Studied yesterday, increment streak
+      user.studyStreak = (user.studyStreak || 0) + 1;
+    } else {
+      // Didn't study yesterday, reset streak
+      user.studyStreak = 1;
+    }
+
+    // Update last study date to today
+    user.lastStudyDate = new Date();
+
+    // Save user
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Study session ended and stats updated',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        studyStreak: user.studyStreak,
+        totalStudyTime: user.totalStudyTime,
+        lastStudyDate: user.lastStudyDate,
+        sessionDuration: sessionDuration
+      }
+    });
+  } catch (error) {
+    console.error('End study session error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during study session end',
+      error: error.message
+    });
+  }
+};

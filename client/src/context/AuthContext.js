@@ -100,7 +100,25 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('studySessionStart');
+    localStorage.removeItem('isStudySessionActive');
     setUser(null);
+  };
+
+  /**
+   * Refresh user data from backend
+   */
+  const refreshUser = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const data = await getMe();
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+    } catch (err) {
+      console.error('Error refreshing user:', err);
+    }
   };
 
   const value = {
@@ -110,6 +128,7 @@ export const AuthProvider = ({ children }) => {
     register,
     login,
     logout,
+    refreshUser,
     isAuthenticated: !!user
   };
 
