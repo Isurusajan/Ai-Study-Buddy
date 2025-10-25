@@ -33,6 +33,33 @@ connectDB();
 
 // ===== MIDDLEWARE =====
 
+// Add explicit CORS headers middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'https://main.d1dg86wxbzr6zt.amplifyapp.com',
+    'https://aistudybuddy.duckdns.org',
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'https://localhost:5000'
+  ];
+
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Max-Age', '86400');
+  }
+
+  // Handle preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
 // Enable CORS (allows frontend to make requests from different domain)
 app.use(cors({
   origin: function(origin, callback) {
@@ -66,10 +93,10 @@ app.use(cors({
 app.options('*', cors());
 
 // Parse JSON request bodies
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 // Parse URL-encoded request bodies
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Request logger (shows incoming requests in console)
 app.use((req, res, next) => {
