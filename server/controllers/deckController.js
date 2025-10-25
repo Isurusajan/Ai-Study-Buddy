@@ -11,9 +11,12 @@ const { generateSummary, generateMCQ, generateShortAnswer, generateLongAnswer } 
  */
 exports.createDeck = async (req, res) => {
   try {
+    console.log('\n========================================');
     console.log('🔍 createDeck called');
     console.log('📋 Body:', req.body);
     console.log('📎 File:', req.file ? `${req.file.originalname} (${req.file.size} bytes)` : 'No file');
+    console.log('👤 User ID:', req.user?.id);
+    console.log('========================================\n');
     
     const { title, subject, description } = req.body;
     const file = req.file;
@@ -130,6 +133,9 @@ exports.createDeck = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Deck creation error:', error);
+    console.error('❌ Error name:', error.name);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
     
     // Handle specific error types
     if (error.name === 'Error' && error.message.includes('buffer')) {
