@@ -125,7 +125,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-blue-50 pb-6 sm:pb-8">
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
       {/* Navigation */}
       <nav className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -154,26 +154,18 @@ const Dashboard = () => {
             <h2 className="text-xl sm:text-3xl font-bold text-gray-900 truncate">Dashboard</h2>
             <p className="mt-1 text-xs sm:text-sm text-gray-600">Track progress & manage materials</p>
           </div>
-          <div className="flex gap-1 sm:gap-2 flex-wrap flex-shrink-0">
+          <div className="flex gap-2 flex-wrap flex-shrink-0">
             <button
               onClick={() => setShowJoinBattle(!showJoinBattle)}
-              className="px-2 sm:px-4 py-1.5 sm:py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center gap-1 sm:gap-2 text-xs sm:text-sm transition-colors whitespace-nowrap"
+              className="px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center gap-2 text-xs sm:text-sm transition-colors"
             >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span className="hidden sm:inline">⚔️ Battle</span>
-              <span className="sm:hidden">⚔️</span>
+              ⚔️ Battle
             </button>
             <button
               onClick={() => setShowUpload(!showUpload)}
-              className="px-2 sm:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center gap-1 sm:gap-2 text-xs sm:text-sm transition-colors whitespace-nowrap"
+              className="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center gap-2 text-xs sm:text-sm transition-colors"
             >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span className="hidden sm:inline">📤 Upload</span>
-              <span className="sm:hidden">📤</span>
+              📤 Upload
             </button>
           </div>
         </div>
