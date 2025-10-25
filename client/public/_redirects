@@ -1,2 +1,2 @@
-/api/*  http://98.80.12.149:5000/api/:splat  200
+/api/*  https://aistudybuddy.duckdns.org:443/api/:splat  200
 /*    /index.html   200
