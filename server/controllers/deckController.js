@@ -55,9 +55,7 @@ exports.createDeck = async (req, res) => {
           folder: 'study-buddy',
           resource_type: 'auto',
           type: 'upload',
-          access_type: 'token',  // Allow signed URLs but also public access
-          flags: 'immutable',     // Cache aggressively
-          delivery_type: 'upload' // Direct delivery, not restricted
+          access_type: 'token'  // Allow signed URLs but also public access
         },
         (error, result) => {
           if (error) {
