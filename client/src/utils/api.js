@@ -15,10 +15,21 @@ if (process.env.REACT_APP_API_URL) {
 }
 
 const api = axios.create({
-  baseURL: apiBaseURL
-  // Don't set default Content-Type header - it will be set per request
-  // For JSON: axios sets it automatically
-  // For FormData: browser sets it with proper boundary
+  baseURL: apiBaseURL,
+  headers: {
+    'Content-Type': undefined  // Allow proper content-type for FormData
+  },
+  transformRequest: [function (data, headers) {
+    // If data is FormData, return it as-is (don't transform)
+    if (data instanceof FormData) {
+      return data;
+    }
+    // For other data, use default axios transformation
+    if (typeof data === 'string') return data;
+    return JSON.stringify(data);
+  }]
+  // For JSON: interceptor will set it
+  // For FormData: browser will set it with boundary
 });
 
 /**
@@ -32,8 +43,14 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Set Content-Type to JSON only if data is not FormData
-    if (config.data && !(config.data instanceof FormData)) {
+    // IMPORTANT: For FormData, do NOT set Content-Type header
+    // Let the browser handle it with the correct boundary
+    // For everything else (JSON), set Content-Type to application/json
+    if (config.data instanceof FormData) {
+      // FormData - delete Content-Type so browser can set it with boundary
+      delete config.headers['Content-Type'];
+    } else if (config.data && typeof config.data === 'object') {
+      // Regular JSON object - set Content-Type explicitly
       config.headers['Content-Type'] = 'application/json';
     }
     
