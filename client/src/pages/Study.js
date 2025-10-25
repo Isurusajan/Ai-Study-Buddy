@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../utils/api';
 import LoadingSpinner from '../components/Loading/LoadingSpinner';
 
 const Study = () => {
@@ -30,17 +30,11 @@ const Study = () => {
 
   const fetchDeckAndFlashcards = async () => {
     try {
-      const token = localStorage.getItem('token');
-
       // Fetch deck info
-      const deckResponse = await axios.get(`/api/decks/${deckId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const deckResponse = await api.get(`/decks/${deckId}`);
 
       // Fetch flashcards
-      const flashcardsResponse = await axios.get(`/api/flashcards/decks/${deckId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const flashcardsResponse = await api.get(`/flashcards/decks/${deckId}`);
 
       setDeck(deckResponse.data.deck);
       setFlashcards(flashcardsResponse.data.flashcards);
@@ -58,7 +52,6 @@ const Study = () => {
 
   const handleResponse = async (quality) => {
     try {
-      const token = localStorage.getItem('token');
       const currentCard = flashcards[currentIndex];
 
       // Update stats
@@ -72,11 +65,7 @@ const Study = () => {
       setSessionStats(newStats);
 
       // Send review to backend (for spaced repetition)
-      await axios.put(
-        `/api/flashcards/${currentCard._id}/review`,
-        { quality },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.put(`/flashcards/${currentCard._id}/review`, { quality });
 
       // Move to next card
       if (currentIndex < flashcards.length - 1) {

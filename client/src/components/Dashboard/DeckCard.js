@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const DeckCard = ({ deck, onDelete }) => {
   const navigate = useNavigate();
@@ -9,10 +9,7 @@ const DeckCard = ({ deck, onDelete }) => {
   const handleDelete = async () => {
     if (window.confirm(`Are you sure you want to delete "${deck.title}"?`)) {
       try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`/api/decks/${deck._id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.delete(`/decks/${deck._id}`);
 
         if (onDelete) {
           onDelete(deck._id);

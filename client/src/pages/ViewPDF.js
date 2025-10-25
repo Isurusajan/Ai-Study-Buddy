@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 
 const ViewPDF = () => {
   const { deckId } = useParams();
@@ -12,18 +12,9 @@ const ViewPDF = () => {
   const fetchDeck = useCallback(async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       
-      if (!token) {
-        console.error('No token found');
-        navigate('/login');
-        return;
-      }
-
       console.log('Fetching deck:', deckId);
-      const response = await axios.get(`/api/decks/${deckId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(`/decks/${deckId}`);
       
       console.log('Deck fetched successfully:', response.data.deck);
       setDeck(response.data.deck);

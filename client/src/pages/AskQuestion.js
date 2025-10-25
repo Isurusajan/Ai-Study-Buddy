@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import LoadingSpinner, { InlineSpinner } from '../components/Loading/LoadingSpinner';
+import api from '../utils/api';
+import { InlineSpinner } from '../components/Loading/LoadingSpinner';
 
 const AskQuestion = () => {
   const { deckId } = useParams();
@@ -22,10 +22,7 @@ const AskQuestion = () => {
 
   const fetchDeck = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`/api/decks/${deckId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(`/decks/${deckId}`);
       setDeck(response.data.deck);
       setLoading(false);
     } catch (err) {
@@ -48,12 +45,10 @@ const AskQuestion = () => {
     setChatHistory(prev => [...prev, { type: 'question', text: userQuestion }]);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `/api/decks/${deckId}/ask`,
-        { question: userQuestion, level: explanationLevel },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.post(`/decks/${deckId}/ask`, {
+        question: userQuestion,
+        level: explanationLevel
+      });
 
       // Add AI answer to chat history
       setChatHistory(prev => [...prev, {

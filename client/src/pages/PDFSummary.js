@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import LoadingSpinner, { InlineSpinner } from '../components/Loading/LoadingSpinner';
+import api from '../utils/api';
+import { InlineSpinner } from '../components/Loading/LoadingSpinner';
 
 const PDFSummary = () => {
   const { deckId } = useParams();
@@ -18,10 +18,7 @@ const PDFSummary = () => {
 
   const fetchDeck = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`/api/decks/${deckId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(`/decks/${deckId}`);
       setDeck(response.data.deck);
       if (response.data.deck.summary) {
         setSummary(response.data.deck.summary);
@@ -36,12 +33,7 @@ const PDFSummary = () => {
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `/api/decks/${deckId}/summary`,
-        { level },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.post(`/decks/${deckId}/summary`, { level });
       setSummary(response.data.summary);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to generate summary');
@@ -53,11 +45,9 @@ const PDFSummary = () => {
 
   const downloadSummary = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `/api/decks/${deckId}/summary/download?level=${level}`,
+      const response = await api.get(
+        `/decks/${deckId}/summary/download?level=${level}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
           responseType: 'blob'
         }
       );

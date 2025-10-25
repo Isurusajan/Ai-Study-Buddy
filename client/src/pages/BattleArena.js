@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import api from '../utils/api';
 import LobbyScreen from '../components/Battle/LobbyScreen';
 import QuestionScreen from '../components/Battle/QuestionScreen';
 import ResultsScreen from '../components/Battle/ResultsScreen';
@@ -217,19 +217,11 @@ function BattleArena() {
   // Create new battle room
   const createBattle = async (deckId, settings) => {
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/battles/create`,
-        {
-          deckId,
-          battleType: 'private',
-          ...settings
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
+      const response = await api.post(`/battles/create`, {
+        deckId,
+        battleType: 'private',
+        ...settings
+      });
       
       const { roomCode, battleId, players } = response.data.data;
       console.log('✅ Battle created response:', { roomCode, battleId, players });

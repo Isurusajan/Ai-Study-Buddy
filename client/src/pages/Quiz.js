@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { InlineSpinner } from '../components/Loading/LoadingSpinner';
 
 const Quiz = () => {
@@ -25,10 +25,7 @@ const Quiz = () => {
 
   const fetchDeck = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`/api/decks/${deckId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(`/decks/${deckId}`);
       setDeck(response.data.deck);
     } catch (err) {
       setError('Failed to load deck');
@@ -40,12 +37,10 @@ const Quiz = () => {
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `/api/decks/${deckId}/quiz`,
-        { count: questionCount, difficulty },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.post(`/decks/${deckId}/quiz`, {
+        count: questionCount,
+        difficulty
+      });
       setQuestions(response.data.questions);
       setQuizStarted(true);
       setCurrentQuestionIndex(0);

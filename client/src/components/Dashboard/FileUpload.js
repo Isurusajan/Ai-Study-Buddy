@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const FileUpload = ({ onUploadSuccess }) => {
   const [file, setFile] = useState(null);
@@ -66,14 +66,10 @@ const FileUpload = ({ onUploadSuccess }) => {
       formData.append('subject', subject);
       formData.append('description', description);
 
-      // Get token from localStorage
-      const token = localStorage.getItem('token');
-
       // Upload file
-      const response = await axios.post('/api/decks', formData, {
+      const response = await api.post('/decks', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'multipart/form-data'
         }
       });
 
