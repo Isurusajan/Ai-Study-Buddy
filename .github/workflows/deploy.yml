@@ -80,41 +80,19 @@ jobs:
         echo "🚀 Starting deployment..."
         
         # Navigate to app directory
-        cd ~/ai-study-buddy
-        
-        # Stop current services
-        echo "⏹️  Stopping services..."
-        pm2 stop all 2>/dev/null || true
+        cd ~/Ai-Study-Buddy
         
         # Pull latest code
         echo "📥 Pulling latest code..."
         git pull origin main
         
-        # Install backend dependencies
-        echo "📦 Installing backend dependencies..."
+        # Restart backend server
+        echo "� Restarting backend server..."
         cd server
-        npm install --production
-        
-        # Start backend
-        echo "🚀 Starting backend..."
-        # pm2 start "npm run dev" --name "backend" --cwd "$(pwd)" || pm2 restart backend
-        # NOTE: Backend managed separately to prevent auto-restart conflicts
-        
-        # Build and serve frontend
-        echo "📦 Installing frontend dependencies..."
-        cd ../client
-        npm install
-        npm run build
-        
-        # Start frontend (if using serve)
-        echo "🚀 Starting frontend..."
-        pm2 start "npm start" --name "frontend" --cwd "$(pwd)" || pm2 restart frontend
-        
-        # Save PM2 configuration
-        pm2 save
+        npx pm2 restart all
         
         echo "✅ Deployment completed!"
-        echo "App is running at: https://${{ secrets.DOMAIN_NAME }}"
+        echo "Backend restarted with latest code"
         EOF
     
     - name: Deployment Status
