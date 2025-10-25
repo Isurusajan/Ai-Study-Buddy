@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../utils/api';
 import FileUpload from '../components/Dashboard/FileUpload';
 import DeckCard from '../components/Dashboard/DeckCard';
 import { FullPageLoader } from '../components/Loading/LoadingSpinner';
@@ -31,11 +31,7 @@ const Dashboard = () => {
 
   const fetchDecks = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/decks', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
+      const response = await api.get('/decks');
       setDecks(response.data.decks);
       setLoading(false);
     } catch (error) {
