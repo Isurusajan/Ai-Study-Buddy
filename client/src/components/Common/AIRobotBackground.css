@@ -63,25 +63,26 @@
 
 /* Main robot SVG */
 .robot {
-  position: absolute;
-  bottom: 0;
+  position: fixed;
+  top: 20px;
   left: 5%;
   transform: translateX(-50%);
   width: 280px;
   height: 380px;
   z-index: 10;
   animation: robotFloat 4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 @keyframes robotFloat {
-  0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
-  50% { transform: translate(-50%, -50%) translateY(-20px); }
+  0%, 100% { transform: translate(-50%, 0px) translateY(0px); }
+  50% { transform: translate(-50%, 0px) translateY(-20px); }
 }
 
 /* Robot glow */
 .robot-glow {
-  position: absolute;
-  bottom: 0;
+  position: fixed;
+  top: 20px;
   left: 5%;
   transform: translateX(-50%);
   width: 350px;
@@ -90,6 +91,7 @@
   border-radius: 50%;
   animation: robotGlow 3s ease-in-out infinite;
   z-index: 9;
+  pointer-events: none;
 }
 
 @keyframes robotGlow {
@@ -254,7 +256,7 @@
   .robot {
     width: 200px;
     height: 270px;
-    bottom: 0;
+    top: 20px;
     left: 5%;
     transform: translateX(-50%);
   }
@@ -262,7 +264,7 @@
   .robot-glow {
     width: 250px;
     height: 320px;
-    bottom: 0;
+    top: 20px;
     left: 5%;
     transform: translateX(-50%);
   }
@@ -281,7 +283,7 @@
   .robot {
     width: 120px;
     height: 160px;
-    bottom: 0;
+    top: 20px;
     left: 5%;
     transform: translateX(-50%);
   }
@@ -289,7 +291,7 @@
   .robot-glow {
     width: 150px;
     height: 200px;
-    bottom: 0;
+    top: 20px;
     left: 5%;
     transform: translateX(-50%);
   }
