@@ -41,8 +41,14 @@ exports.createDeck = async (req, res) => {
           delivery_type: 'upload' // Direct delivery, not restricted
         },
         (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
+          if (error) {
+            console.error('❌ Cloudinary upload error:', error);
+            reject(error);
+          }
+          else {
+            console.log('✅ Cloudinary upload success:', result.public_id);
+            resolve(result);
+          }
         }
       );
       uploadStream.end(file.buffer);
@@ -100,6 +106,14 @@ exports.createDeck = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('❌ Deck creation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create deck',
+      error: error.message
+    });
+  }
+};  } catch (error) {
     console.error('Create deck error:', error);
     res.status(500).json({
       success: false,
