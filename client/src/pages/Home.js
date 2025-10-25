@@ -61,16 +61,16 @@ const Home = () => {
               All powered by advanced AI to accelerate your learning journey.
             </p>
 
-            <div className="mt-10 flex justify-center gap-4">
+            <div className="mt-10 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <Link
                 to="/register"
-                className="px-8 py-3 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105"
+                className="px-6 sm:px-8 py-2 sm:py-3 rounded-md text-sm sm:text-base font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 text-center"
               >
                 Get Started Free
               </Link>
               <Link
                 to="/login"
-                className="px-8 py-3 rounded-md text-base font-medium text-white bg-white/20 hover:bg-white/30 shadow-lg backdrop-blur-md border border-white/30 transition-all transform hover:scale-105"
+                className="px-6 sm:px-8 py-2 sm:py-3 rounded-md text-sm sm:text-base font-medium text-white bg-white/20 hover:bg-white/30 shadow-lg backdrop-blur-md border border-white/30 transition-all transform hover:scale-105 text-center"
               >
                 Sign In
               </Link>
@@ -134,16 +134,16 @@ const Home = () => {
             <p className="text-white/90 text-center text-lg mb-8">
               Join thousands of students using AI Study Buddy to master their subjects faster and smarter.
             </p>
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <Link
                 to="/register"
-                className="px-8 py-3 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105"
+                className="px-6 sm:px-8 py-2 sm:py-3 rounded-md text-sm sm:text-base font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 text-center"
               >
                 Start Free Trial
               </Link>
               <Link
                 to="/login"
-                className="px-8 py-3 rounded-md text-base font-medium text-white bg-white/20 hover:bg-white/30 shadow-lg backdrop-blur-md border border-white/30 transition-all transform hover:scale-105"
+                className="px-6 sm:px-8 py-2 sm:py-3 rounded-md text-sm sm:text-base font-medium text-white bg-white/20 hover:bg-white/30 shadow-lg backdrop-blur-md border border-white/30 transition-all transform hover:scale-105 text-center"
               >
                 Sign In
               </Link>
