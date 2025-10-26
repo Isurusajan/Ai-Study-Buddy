@@ -4,46 +4,47 @@ import '../styles/homeBattle.css';
 
 const Home = () => {
   return (
-    <div className="relative w-screen overflow-x-hidden">
-      {/* Animated battle background */}
-      <div className="battle-background"></div>
-
-      {/* Floating knowledge orbs */}
-      <div className="particle particle-1"></div>
-      <div className="particle particle-2"></div>
-      <div className="particle particle-3"></div>
-      <div className="particle particle-4"></div>
-      <div className="particle particle-5"></div>
-
-      {/* Student characters battling */}
-      <div className="student-left">👨‍🎓</div>
-      <div className="student-right">👩‍🎓</div>
-
-      {/* Energy beam between students */}
-      <div className="energy-beam"></div>
-
-      {/* Floating cards */}
-      <div className="floating-card card-1">
-        <div className="text-2xl">📚</div>
-        <div className="text-white text-xs mt-1 font-semibold">Learn</div>
+    <div className="relative w-screen overflow-x-hidden bg-gradient-to-b from-slate-900 via-blue-900 to-slate-950">
+      {/* Space background with stars */}
+      <div className="fixed inset-0 z-0">
+        {/* Animated starfield */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(100,200,255,0.1),transparent_50%),radial-gradient(circle_at_80%_80%,rgba(150,100,255,0.1),transparent_50%)]"></div>
+        
+        {/* Twinkling stars */}
+        <div className="absolute w-1 h-1 bg-white rounded-full top-10 left-10 opacity-60 animate-pulse"></div>
+        <div className="absolute w-1.5 h-1.5 bg-white rounded-full top-20 right-20 opacity-40 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+        <div className="absolute w-1 h-1 bg-blue-200 rounded-full top-1/3 left-1/4 opacity-50 animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute w-1.5 h-1.5 bg-white rounded-full bottom-1/3 right-1/3 opacity-70 animate-pulse" style={{animationDelay: '1.5s'}}></div>
+        <div className="absolute w-1 h-1 bg-cyan-200 rounded-full bottom-1/4 left-1/3 opacity-45 animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute w-1.5 h-1.5 bg-white rounded-full top-1/2 right-1/4 opacity-60 animate-pulse" style={{animationDelay: '2.5s'}}></div>
       </div>
-      <div className="floating-card card-2">
-        <div className="text-2xl">⚡</div>
-        <div className="text-white text-xs mt-1 font-semibold">Master</div>
+
+      {/* AI Robots in space */}
+      <div className="absolute top-1/4 left-5 sm:left-10 z-10 text-5xl sm:text-7xl animate-bounce" style={{animationDuration: '4s'}}>
+        🤖
       </div>
-      <div className="floating-card card-3">
-        <div className="text-2xl">🏆</div>
-        <div className="text-white text-xs mt-1 font-semibold">Win</div>
+      <div className="absolute top-1/3 right-10 sm:right-20 z-10 text-4xl sm:text-6xl" style={{animation: 'float 6s ease-in-out infinite', animationDelay: '1s'}}>
+        🛸
       </div>
+      <div className="absolute bottom-1/3 left-1/4 z-10 text-5xl sm:text-6xl opacity-80" style={{animation: 'float 5s ease-in-out infinite', animationDelay: '2s'}}>
+        🤖
+      </div>
+      <div className="absolute bottom-1/4 right-1/3 z-10 text-4xl sm:text-5xl opacity-70" style={{animation: 'float 7s ease-in-out infinite'}}>
+        🌌
+      </div>
+
+      {/* Nebula effects */}
+      <div className="absolute top-20 left-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl opacity-30"></div>
+      <div className="absolute bottom-32 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl opacity-20"></div>
 
       {/* Content overlay */}
-      <div className="battle-content">
+      <div className="battle-content relative z-20">
         {/* Navigation */}
-        <nav className="bg-white/10 backdrop-blur-md shadow-sm">
+        <nav className="bg-slate-900/60 backdrop-blur-md shadow-sm border-b border-blue-500/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
               <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-white drop-shadow-lg">AI Study Buddy</h1>
+                <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 drop-shadow-lg">🤖 AI Study Buddy</h1>
               </div>
             </div>
           </div>
