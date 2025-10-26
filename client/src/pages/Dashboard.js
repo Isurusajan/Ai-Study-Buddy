@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import FileUpload from '../components/Dashboard/FileUpload';
 import DeckCard from '../components/Dashboard/DeckCard';
+import SmartRecommendations from '../components/Dashboard/SmartRecommendations';
 import { FullPageLoader } from '../components/Loading/LoadingSpinner';
 
 const Dashboard = () => {
@@ -194,8 +195,8 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Smart Study Recommendations - Disabled until backend deployment completes */}
-        {/* {decks.length > 0 && <SmartRecommendations decks={decks} />} */}
+        {/* Smart Study Recommendations */}
+        {decks.length > 0 && <SmartRecommendations decks={decks} />}
 
         {/* File Upload Section */}
         {showUpload && (
