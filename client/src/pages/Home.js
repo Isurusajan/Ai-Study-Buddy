@@ -50,79 +50,87 @@ const Home = () => {
         </nav>
 
         {/* Hero Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-24">
           <div className="text-center">
-            <h2 className="text-5xl font-extrabold text-white sm:text-6xl hero-glow">
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white hero-glow leading-tight">
               Master Any Subject with{' '}
-              <span className="text-yellow-300">AI-Powered Learning</span>
+              <span className="text-yellow-300">AI Power</span>
             </h2>
-            <p className="mt-6 text-xl text-white/90 max-w-3xl mx-auto drop-shadow-lg">
-              Create flashcards, generate quizzes, summarize PDFs, practice with AI, and battle friends in multiplayer mode. 
-              All powered by advanced AI to accelerate your learning journey.
+            <p className="mt-4 sm:mt-6 text-base sm:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto drop-shadow-lg px-2">
+              Generate smart quizzes, get instant PDF summaries, practice with AI feedback, and battle friends in multiplayer mode.
             </p>
 
-            <div className="mt-10 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-2">
               <Link
                 to="/register"
-                className="px-6 sm:px-8 py-2 sm:py-3 rounded-md text-sm sm:text-base font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 text-center"
+                className="px-6 sm:px-8 py-3 sm:py-3 rounded-lg text-base sm:text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 text-center"
               >
                 Get Started Free
               </Link>
               <Link
                 to="/login"
-                className="px-6 sm:px-8 py-2 sm:py-3 rounded-md text-sm sm:text-base font-medium text-white bg-white/20 hover:bg-white/30 shadow-lg backdrop-blur-md border border-white/30 transition-all transform hover:scale-105 text-center"
+                className="px-6 sm:px-8 py-3 sm:py-3 rounded-lg text-base sm:text-base font-semibold text-white bg-white/20 hover:bg-white/30 shadow-lg backdrop-blur-md border border-white/30 transition-all transform hover:scale-105 text-center"
               >
                 Sign In
               </Link>
             </div>
           </div>
 
-          {/* Features Grid */}
-          <div className="mt-24">
-            <h3 className="text-3xl font-bold text-white text-center mb-12">Powerful Features</h3>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Features Grid - Mobile Optimized */}
+          <div className="mt-16 sm:mt-24">
+            <h3 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12 px-2">✨ Powerful Features</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {/* Feature 1 */}
-              <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
-                <div className="text-yellow-300 text-4xl mb-4">🎯</div>
-                <h3 className="text-xl font-semibold text-white mb-2">AI Quizzes</h3>
-                <p className="text-white/80">
-                  Generate intelligent multiple-choice quizzes with adaptive difficulty. Test your knowledge anytime.
+              <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-yellow-300 text-4xl mb-3 sm:mb-4">🎯</div>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">AI Quizzes</h3>
+                <p className="text-sm sm:text-base text-white/80">
+                  Generate intelligent quizzes with different difficulty levels. Test and master any topic.
                 </p>
               </div>
 
               {/* Feature 2 */}
-              <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
-                <div className="text-purple-200 text-4xl mb-4">📝</div>
-                <h3 className="text-xl font-semibold text-white mb-2">PDF Summaries</h3>
-                <p className="text-white/80">
-                  Get AI-powered summaries of your study materials. Understand key concepts instantly.
+              <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-purple-200 text-4xl mb-3 sm:mb-4">�</div>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">PDF Summaries</h3>
+                <p className="text-sm sm:text-base text-white/80">
+                  AI-powered summaries of your study materials. Grasp key concepts instantly.
                 </p>
               </div>
 
               {/* Feature 3 */}
-              <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
-                <div className="text-green-200 text-4xl mb-4">⚡</div>
-                <h3 className="text-xl font-semibold text-white mb-2">Practice Modes</h3>
-                <p className="text-white/80">
-                  Short-answer and long-answer practice with AI evaluation. Get detailed feedback instantly.
+              <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-green-200 text-4xl mb-3 sm:mb-4">⚡</div>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Practice Modes</h3>
+                <p className="text-sm sm:text-base text-white/80">
+                  Short-answer and essay practice with instant AI feedback. Learn from mistakes.
                 </p>
               </div>
 
               {/* Feature 4 */}
-              <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
-                <div className="text-red-300 text-4xl mb-4">⚔️</div>
-                <h3 className="text-xl font-semibold text-white mb-2">Battle Mode</h3>
-                <p className="text-white/80">
-                  Compete with friends in real-time multiplayer battles. Unlimited players, ELO ratings, leaderboards.
+              <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-red-300 text-4xl mb-3 sm:mb-4">⚔️</div>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Battle Mode</h3>
+                <p className="text-sm sm:text-base text-white/80">
+                  Real-time multiplayer quiz battles with friends. ELO ratings and leaderboards.
                 </p>
               </div>
 
               {/* Feature 5 */}
-              <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
-                <div className="text-pink-300 text-4xl mb-4">🏆</div>
-                <h3 className="text-xl font-semibold text-white mb-2">Achievements</h3>
-                <p className="text-white/80">
-                  Unlock badges and track your progress. Climb the global leaderboard and become a study master.
+              <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-pink-300 text-4xl mb-3 sm:mb-4">🏆</div>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Achievements</h3>
+                <p className="text-sm sm:text-base text-white/80">
+                  Earn badges, build streaks, and unlock milestones. Climb the global leaderboard.
+                </p>
+              </div>
+
+              {/* Feature 6 - New Feature */}
+              <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
+                <div className="text-blue-300 text-4xl mb-3 sm:mb-4">💡</div>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">Ask AI</h3>
+                <p className="text-sm sm:text-base text-white/80">
+                  Ask questions about your study materials and get instant AI-powered answers.
                 </p>
               </div>
             </div>
