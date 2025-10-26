@@ -39,33 +39,33 @@ const Dashboard = () => {
     // Get or initialize today's study date and session start time
     const today = new Date().toDateString();
     let studyDate = localStorage.getItem('studyDate');
-    let dailySessionStart = localStorage.getItem('dailySessionStart');
+    let dashboardSessionStart = localStorage.getItem('dashboardSessionStart');
 
-    // If date changed, reset daily session start
+    // If date changed, reset dashboard session start
     if (studyDate !== today) {
       localStorage.setItem('studyDate', today);
-      localStorage.setItem('dailySessionStart', Date.now().toString());
-      dailySessionStart = Date.now().toString();
-    } else if (!dailySessionStart) {
-      localStorage.setItem('dailySessionStart', Date.now().toString());
-      dailySessionStart = Date.now().toString();
+      localStorage.setItem('dashboardSessionStart', Date.now().toString());
+      dashboardSessionStart = Date.now().toString();
+    } else if (!dashboardSessionStart) {
+      localStorage.setItem('dashboardSessionStart', Date.now().toString());
+      dashboardSessionStart = Date.now().toString();
     }
 
     const interval = setInterval(() => {
       const currentDate = new Date().toDateString();
-      let sessionStart = parseInt(localStorage.getItem('dailySessionStart') || Date.now().toString());
+      let sessionStart = parseInt(localStorage.getItem('dashboardSessionStart') || Date.now().toString());
 
       // Check if day has changed since last update
       const lastStoredDate = localStorage.getItem('studyDate');
       if (lastStoredDate !== currentDate) {
         localStorage.setItem('studyDate', currentDate);
-        localStorage.setItem('dailySessionStart', Date.now().toString());
+        localStorage.setItem('dashboardSessionStart', Date.now().toString());
         sessionStart = Date.now();
       }
 
-      // Calculate study time for today only
+      // Calculate study time only while on Dashboard (session time only)
       const elapsedSeconds = Math.floor((Date.now() - sessionStart) / 1000);
-      setLiveStudyTime(elapsedSeconds); // Only today's study time
+      setLiveStudyTime(elapsedSeconds); // Only Dashboard viewing time
 
       // Update streak based on current study session
       const lastStudyDate = user.lastStudyDate ? new Date(user.lastStudyDate).toDateString() : null;
@@ -130,10 +130,11 @@ const Dashboard = () => {
       <nav className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="flex justify-between h-12 sm:h-16 items-center gap-2">
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex-1 min-w-0">
               <h1 className="text-xs sm:text-2xl font-bold text-blue-600 whitespace-nowrap">🤖 Buddy</h1>
+              <p className="text-xs text-gray-600 sm:hidden truncate">Welcome, <span className="font-semibold">{user.name}</span>!</p>
             </div>
-            <div className="flex items-center space-x-1 sm:space-x-4">
+            <div className="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
               <span className="text-xs text-gray-700 hidden sm:inline">Welcome, <span className="font-semibold">{user.name}</span>!</span>
               <button
                 onClick={logout}
