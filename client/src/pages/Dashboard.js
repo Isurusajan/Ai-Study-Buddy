@@ -16,7 +16,6 @@ const Dashboard = () => {
   const [roomCode, setRoomCode] = useState('');
   const [liveStudyTime, setLiveStudyTime] = useState(0);
   const [liveStreak, setLiveStreak] = useState(user?.studyStreak || 0);
-  const [quizCount, setQuizCount] = useState(0);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -29,9 +28,6 @@ const Dashboard = () => {
   useEffect(() => {
     if (isAuthenticated && refreshUser) {
       fetchDecks();
-      // Only fetch quiz count if the API endpoint is available
-      // This prevents repeated 404 errors
-      fetchQuizCount();
       refreshUser();
     }
   }, [isAuthenticated, refreshUser]);
@@ -141,18 +137,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error fetching decks:', error);
       setLoading(false);
-    }
-  };
-
-  // Fetch quiz count (only try once to avoid spam)
-  const fetchQuizCount = async () => {
-    try {
-      const response = await api.get('/quizzes/count');
-      setQuizCount(response.data.count || 0);
-    } catch (error) {
-      // Silently fail - quiz count is optional feature
-      // Set to 0 and don't retry
-      setQuizCount(0);
     }
   };
 
@@ -273,12 +257,6 @@ const Dashboard = () => {
           <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-2 sm:p-4 border-t-4 border-blue-500">
             <p className="text-xs font-medium text-gray-600 truncate">📚 Decks</p>
             <p className="text-lg sm:text-3xl font-bold text-gray-900 mt-0.5 sm:mt-2">{decks.length}</p>
-          </div>
-
-          {/* Total Cards/Questions */}
-          <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-2 sm:p-4 border-t-4 border-green-500">
-            <p className="text-xs font-medium text-gray-600 truncate">📋 Quizzes Done</p>
-            <p className="text-lg sm:text-3xl font-bold text-gray-900 mt-0.5 sm:mt-2">{quizCount}</p>
           </div>
 
           {/* Study Streak - LIVE */}
