@@ -15,7 +15,7 @@ const Dashboard = () => {
   const [showJoinBattle, setShowJoinBattle] = useState(false);
   const [roomCode, setRoomCode] = useState('');
   const [liveStudyTime, setLiveStudyTime] = useState(0);
-  const [liveStreak] = useState(user?.studyStreak || 0);
+  const [liveStreak, setLiveStreak] = useState(user?.studyStreak || 0);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -32,28 +32,56 @@ const Dashboard = () => {
     }
   }, [isAuthenticated, refreshUser]);
 
-  // Auto-track study time from login - updates every second with daily reset
+  // Auto-track study time and streak - updates every second with daily reset
   useEffect(() => {
     if (!user) return;
 
     const today = new Date().toDateString();
     const storageKeySessionStart = 'dashboardSessionStart';
     const storageKeyDate = 'studyDate';
+    const storageKeyLastLogin = 'lastStudyDate';
 
     // Initialize localStorage on first load
     let sessionStartTime = localStorage.getItem(storageKeySessionStart);
     let storedDate = localStorage.getItem(storageKeyDate);
+    let lastLoginDate = localStorage.getItem(storageKeyLastLogin);
 
-    // If it's a new day, reset
+    // Check if it's a new day - reset if necessary
     if (storedDate !== today) {
+      // Day has changed - increment streak if yesterday was tracked
+      if (lastLoginDate) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toDateString();
+        
+        if (lastLoginDate === yesterdayStr) {
+          // Consecutive day - increment streak
+          setLiveStreak(prev => prev + 1);
+        } else {
+          // Non-consecutive day - reset to 1
+          setLiveStreak(1);
+        }
+      } else {
+        // First time logging in - start streak at 1
+        setLiveStreak(1);
+      }
+
+      // Reset session start for new day
       sessionStartTime = Date.now().toString();
       localStorage.setItem(storageKeySessionStart, sessionStartTime);
       localStorage.setItem(storageKeyDate, today);
+      localStorage.setItem(storageKeyLastLogin, today);
     } else if (!sessionStartTime) {
       // First time visiting dashboard today
       sessionStartTime = Date.now().toString();
       localStorage.setItem(storageKeySessionStart, sessionStartTime);
       localStorage.setItem(storageKeyDate, today);
+      
+      // Initialize streak on first load
+      if (!lastLoginDate) {
+        setLiveStreak(1);
+        localStorage.setItem(storageKeyLastLogin, today);
+      }
     }
 
     // Set initial study time
@@ -61,15 +89,30 @@ const Dashboard = () => {
     const initialSeconds = Math.floor((Date.now() - startTime) / 1000);
     setLiveStudyTime(initialSeconds);
 
-    // Update study time every second
+    // Update study time and check for day change every second
     const interval = setInterval(() => {
       const currentDate = new Date().toDateString();
       const stored = localStorage.getItem(storageKeySessionStart);
+      const storedDateInStorage = localStorage.getItem(storageKeyDate);
 
       // Check if day changed
-      if (localStorage.getItem(storageKeyDate) !== currentDate) {
+      if (storedDateInStorage !== currentDate) {
+        // New day detected - increment streak
+        const prevLastLogin = localStorage.getItem(storageKeyLastLogin);
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toDateString();
+        
+        if (prevLastLogin === yesterdayStr) {
+          setLiveStreak(prev => prev + 1);
+        } else {
+          setLiveStreak(1);
+        }
+
+        // Reset for new day
         localStorage.setItem(storageKeyDate, currentDate);
         localStorage.setItem(storageKeySessionStart, Date.now().toString());
+        localStorage.setItem(storageKeyLastLogin, currentDate);
         setLiveStudyTime(0);
         return;
       }
