@@ -14,8 +14,8 @@ const Dashboard = () => {
   const [showUpload, setShowUpload] = useState(false);
   const [showJoinBattle, setShowJoinBattle] = useState(false);
   const [roomCode, setRoomCode] = useState('');
-  const [liveStudyTime, setLiveStudyTime] = useState(user?.totalStudyTime || 0);
-  const [liveStreak, setLiveStreak] = useState(user?.studyStreak || 0);
+  const [liveStudyTime, setLiveStudyTime] = useState(0);
+  const [liveStreak] = useState(user?.studyStreak || 0);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -36,56 +36,48 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Get or initialize today's study date and session start time
     const today = new Date().toDateString();
-    
-    // Check if user has no study history - clear old localStorage to prevent 12h issue
-    if (user.totalStudyTime === 0 && user.studyStreak === 0) {
-      localStorage.removeItem('dashboardSessionStart');
-      localStorage.removeItem('studyDate');
-    }
-    
-    let studyDate = localStorage.getItem('studyDate');
-    let dashboardSessionStart = localStorage.getItem('dashboardSessionStart');
+    const storageKeySessionStart = 'dashboardSessionStart';
+    const storageKeyDate = 'studyDate';
 
-    // If date changed, reset dashboard session start
-    if (studyDate !== today) {
-      localStorage.setItem('studyDate', today);
-      localStorage.setItem('dashboardSessionStart', Date.now().toString());
-      dashboardSessionStart = Date.now().toString();
-    } else if (!dashboardSessionStart) {
-      // Initialize session start time if not set
-      localStorage.setItem('dashboardSessionStart', Date.now().toString());
-      dashboardSessionStart = Date.now().toString();
-      // Also initialize the date
-      if (!studyDate) {
-        localStorage.setItem('studyDate', today);
-      }
+    // Initialize localStorage on first load
+    let sessionStartTime = localStorage.getItem(storageKeySessionStart);
+    let storedDate = localStorage.getItem(storageKeyDate);
+
+    // If it's a new day, reset
+    if (storedDate !== today) {
+      sessionStartTime = Date.now().toString();
+      localStorage.setItem(storageKeySessionStart, sessionStartTime);
+      localStorage.setItem(storageKeyDate, today);
+    } else if (!sessionStartTime) {
+      // First time visiting dashboard today
+      sessionStartTime = Date.now().toString();
+      localStorage.setItem(storageKeySessionStart, sessionStartTime);
+      localStorage.setItem(storageKeyDate, today);
     }
 
+    // Set initial study time
+    const startTime = parseInt(sessionStartTime);
+    const initialSeconds = Math.floor((Date.now() - startTime) / 1000);
+    setLiveStudyTime(initialSeconds);
+
+    // Update study time every second
     const interval = setInterval(() => {
       const currentDate = new Date().toDateString();
-      let sessionStart = parseInt(localStorage.getItem('dashboardSessionStart') || Date.now().toString());
+      const stored = localStorage.getItem(storageKeySessionStart);
 
-      // Check if day has changed since last update
-      const lastStoredDate = localStorage.getItem('studyDate');
-      if (lastStoredDate !== currentDate) {
-        localStorage.setItem('studyDate', currentDate);
-        localStorage.setItem('dashboardSessionStart', Date.now().toString());
-        sessionStart = Date.now();
+      // Check if day changed
+      if (localStorage.getItem(storageKeyDate) !== currentDate) {
+        localStorage.setItem(storageKeyDate, currentDate);
+        localStorage.setItem(storageKeySessionStart, Date.now().toString());
+        setLiveStudyTime(0);
+        return;
       }
 
-      // Calculate study time only while on Dashboard (session time only)
-      const elapsedSeconds = Math.floor((Date.now() - sessionStart) / 1000);
-      setLiveStudyTime(elapsedSeconds); // Only Dashboard viewing time
-
-      // Update streak based on current study session
-      const lastStudyDate = user.lastStudyDate ? new Date(user.lastStudyDate).toDateString() : null;
-
-      if (lastStudyDate === currentDate) {
-        setLiveStreak(user.studyStreak || 0);
-      } else {
-        setLiveStreak((user.studyStreak || 0) + 1);
+      // Calculate elapsed time
+      if (stored) {
+        const elapsed = Math.floor((Date.now() - parseInt(stored)) / 1000);
+        setLiveStudyTime(elapsed);
       }
     }, 1000);
 
