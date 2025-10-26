@@ -124,31 +124,52 @@ app.get('/', (req, res) => {
   });
 });
 
-// Admin deployment endpoint (development only)
-if (process.env.NODE_ENV === 'development') {
-  app.post('/admin/deploy', (req, res) => {
-    const { exec } = require('child_process');
-    console.log('🚀 Deploy endpoint triggered - pulling latest code...');
+// Admin restart endpoint - pulls latest code and restarts (for deployment emergencies)
+app.post('/admin/restart', async (req, res) => {
+  try {
+    const adminSecret = req.headers['x-admin-secret'];
+    const expectedSecret = process.env.ADMIN_SECRET || 'emergency-restart-key-2024';
     
-    exec('cd /home/ec2-user/Ai-Study-Buddy && git pull origin main && cd server && npx pm2 restart all', 
-      (error, stdout, stderr) => {
-        if (error) {
-          console.error('Deploy error:', error);
-          return res.status(500).json({ 
-            success: false, 
-            message: 'Deploy failed', 
-            error: error.message 
-          });
-        }
-        console.log('✅ Deploy successful');
-        res.json({ 
-          success: true, 
-          message: 'Server deployed and restarted successfully'
+    // Basic auth check
+    if (adminSecret !== expectedSecret) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Unauthorized - invalid admin secret' 
+      });
+    }
+    
+    console.log('🚀 Admin restart endpoint triggered...');
+    const { exec } = require('child_process');
+    
+    // Determine the correct path based on environment
+    const repoPath = process.env.REPO_PATH || '/home/ubuntu/Ai-Study-Buddy';
+    const gitCommand = `cd ${repoPath}/server && git pull origin main && npx pm2 restart all`;
+    
+    exec(gitCommand, (error, stdout, stderr) => {
+      if (error) {
+        console.error('❌ Restart error:', error.message);
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Restart failed', 
+          error: error.message 
         });
       }
-    );
-  });
-}
+      console.log('✅ Backend restarted successfully');
+      console.log(stdout);
+      res.json({ 
+        success: true, 
+        message: 'Backend restarted and latest code loaded',
+        output: stdout
+      });
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Restart error',
+      error: error.message 
+    });
+  }
+});
 
 // 404 handler - catch all unmatched routes
 app.use((req, res) => {
