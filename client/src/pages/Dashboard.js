@@ -38,6 +38,13 @@ const Dashboard = () => {
 
     // Get or initialize today's study date and session start time
     const today = new Date().toDateString();
+    
+    // Check if user has no study history - clear old localStorage to prevent 12h issue
+    if (user.totalStudyTime === 0 && user.studyStreak === 0) {
+      localStorage.removeItem('dashboardSessionStart');
+      localStorage.removeItem('studyDate');
+    }
+    
     let studyDate = localStorage.getItem('studyDate');
     let dashboardSessionStart = localStorage.getItem('dashboardSessionStart');
 
@@ -47,8 +54,13 @@ const Dashboard = () => {
       localStorage.setItem('dashboardSessionStart', Date.now().toString());
       dashboardSessionStart = Date.now().toString();
     } else if (!dashboardSessionStart) {
+      // Initialize session start time if not set
       localStorage.setItem('dashboardSessionStart', Date.now().toString());
       dashboardSessionStart = Date.now().toString();
+      // Also initialize the date
+      if (!studyDate) {
+        localStorage.setItem('studyDate', today);
+      }
     }
 
     const interval = setInterval(() => {
