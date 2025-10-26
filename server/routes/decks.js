@@ -42,6 +42,9 @@ router.post('/', protect, uploadWrapper, createDeck);
 // Get all decks for current user
 router.get('/', protect, getDecks);
 
+// Get smart recommendations based on quiz performance (must come BEFORE /:id route)
+router.get('/recommendations', protect, getRecommendations);
+
 // Get single deck
 router.get('/:id', protect, getDeck);
 
@@ -142,8 +145,5 @@ router.get('/:id/pdf-proxy', async (req, res) => {
     res.status(500).json({ error: 'Failed to load PDF' });
   }
 });
-
-// Get smart recommendations based on quiz performance
-router.get('/recommendations', protect, getRecommendations);
 
 module.exports = router;
