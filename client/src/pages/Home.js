@@ -53,23 +53,23 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-24">
           <div className="text-center">
             <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white hero-glow leading-tight">
-              Master Any Subject with{' '}
-              <span className="text-yellow-300">AI Power</span>
+              Master Any Subject —
+              <span className="text-yellow-300"> Faster with AI</span>
             </h2>
-            <p className="mt-4 sm:mt-6 text-base sm:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto drop-shadow-lg px-2">
-              Generate smart quizzes, get instant PDF summaries, practice with AI feedback, and battle friends in multiplayer mode.
+            <p className="mt-4 sm:mt-6 text-sm sm:text-lg lg:text-xl text-white/95 max-w-xl mx-auto drop-shadow-lg px-2">
+              Instant PDF summaries, smart quizzes, AI feedback, and fun multiplayer battles — learn smarter in less time.
             </p>
 
-            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-2">
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-2 w-full">
               <Link
                 to="/register"
-                className="px-6 sm:px-8 py-3 sm:py-3 rounded-lg text-base sm:text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 text-center"
+                className="w-full sm:w-auto px-6 py-4 rounded-lg text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 text-center"
               >
-                Get Started Free
+                Get Started — It's Free
               </Link>
               <Link
                 to="/login"
-                className="px-6 sm:px-8 py-3 sm:py-3 rounded-lg text-base sm:text-base font-semibold text-white bg-white/20 hover:bg-white/30 shadow-lg backdrop-blur-md border border-white/30 transition-all transform hover:scale-105 text-center"
+                className="w-full sm:w-auto px-6 py-4 rounded-lg text-base font-semibold text-blue-800 bg-white/90 hover:bg-white shadow-md border border-white/30 transition-all transform hover:scale-105 text-center"
               >
                 Sign In
               </Link>
@@ -91,7 +91,7 @@ const Home = () => {
 
               {/* Feature 2 */}
               <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all transform hover:-translate-y-1">
-                <div className="text-purple-200 text-4xl mb-3 sm:mb-4">�</div>
+                  <div className="text-purple-200 text-4xl mb-3 sm:mb-4">📝</div>
                 <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">PDF Summaries</h3>
                 <p className="text-sm sm:text-base text-white/80">
                   AI-powered summaries of your study materials. Grasp key concepts instantly.
