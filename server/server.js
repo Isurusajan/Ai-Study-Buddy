@@ -112,6 +112,9 @@ app.use('/api/auth', require('./routes/auth'));
 // Deck routes
 app.use('/api/decks', require('./routes/decks'));
 
+// Quiz routes
+app.use('/api/quizzes', require('./routes/quizzes'));
+
 // Battle routes
 app.use('/api/battles', require('./routes/battles'));
 
