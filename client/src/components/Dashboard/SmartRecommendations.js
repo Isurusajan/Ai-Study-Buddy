@@ -5,6 +5,8 @@ const SmartRecommendations = ({ decks }) => {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRec, setSelectedRec] = useState(null);
+  const [endpointError, setEndpointError] = useState(false);
+  const [restarting, setRestarting] = useState(false);
 
   useEffect(() => {
     fetchRecommendations();
@@ -13,18 +15,44 @@ const SmartRecommendations = ({ decks }) => {
   const fetchRecommendations = async () => {
     try {
       setLoading(true);
+      setEndpointError(false);
       const response = await api.get('/recommendations');
       setRecommendations(response.data.recommendations || []);
     } catch (error) {
       // 404 means backend hasn't been restarted yet with the new route
       if (error.response?.status === 404) {
         console.warn('⚠️ Recommendations endpoint not yet available. Backend server may need restart.');
+        setEndpointError(true);
       } else {
         console.error('Error fetching recommendations:', error);
       }
       setRecommendations([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRestartBackend = async () => {
+    try {
+      setRestarting(true);
+      const response = await api.post('/admin/restart', {}, {
+        headers: {
+          'x-admin-secret': 'emergency-restart-key-2024'
+        }
+      });
+      
+      if (response.data.success) {
+        console.log('✅ Backend restart initiated');
+        // Wait 3 seconds for backend to restart, then retry
+        setTimeout(() => {
+          fetchRecommendations();
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Error restarting backend:', error);
+      alert('Error restarting backend. Please contact admin.');
+    } finally {
+      setRestarting(false);
     }
   };
 
@@ -50,6 +78,29 @@ const SmartRecommendations = ({ decks }) => {
     return (
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 sm:p-6 shadow-md mb-4 sm:mb-6 animate-pulse">
         <div className="h-6 bg-gray-300 rounded w-1/3 mb-4"></div>
+      </div>
+    );
+  }
+
+  // Show restart button if endpoint error
+  if (endpointError) {
+    return (
+      <div className="mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          💡 AI Study Recommendations
+        </h3>
+        <div className="bg-amber-50 border border-amber-300 rounded-lg p-4 sm:p-6">
+          <p className="text-sm text-amber-900 mb-4">
+            ⚠️ The Smart Recommendations feature is being set up. Click the button below to activate it.
+          </p>
+          <button
+            onClick={handleRestartBackend}
+            disabled={restarting}
+            className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors"
+          >
+            {restarting ? '⏳ Activating...' : '🚀 Activate Feature'}
+          </button>
+        </div>
       </div>
     );
   }
