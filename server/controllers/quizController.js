@@ -1,4 +1,5 @@
 const Quiz = require('../models/Quiz');
+const mongoose = require('mongoose');
 
 /**
  * @desc    Save a completed quiz attempt
@@ -104,9 +105,10 @@ exports.getUserQuizzes = async (req, res) => {
 exports.getQuizStats = async (req, res) => {
   try {
     const userId = req.user.id;
+    const userObjectId = mongoose.Types.ObjectId(userId);
 
     const stats = await Quiz.aggregate([
-      { $match: { userId: require('mongoose').Types.ObjectId(userId) } },
+      { $match: { userId: userObjectId } },
       {
         $group: {
           _id: null,

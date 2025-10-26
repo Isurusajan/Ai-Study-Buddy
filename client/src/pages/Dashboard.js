@@ -149,6 +149,8 @@ const Dashboard = () => {
       setQuizCount(response.data.count || 0);
     } catch (error) {
       console.error('Error fetching quiz count:', error);
+      // Set to 0 if there's an error - don't spam the console
+      setQuizCount(0);
     }
   };
 
