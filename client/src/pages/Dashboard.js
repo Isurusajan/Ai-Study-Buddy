@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [roomCode, setRoomCode] = useState('');
   const [liveStudyTime, setLiveStudyTime] = useState(0);
   const [liveStreak, setLiveStreak] = useState(user?.studyStreak || 0);
+  const [totalQuizzesCompleted, setTotalQuizzesCompleted] = useState(0);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -28,6 +29,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (isAuthenticated && refreshUser) {
       fetchDecks();
+      fetchQuizzesCompleted();
       refreshUser();
     }
   }, [isAuthenticated, refreshUser]);
@@ -137,6 +139,16 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error fetching decks:', error);
       setLoading(false);
+    }
+  };
+
+  const fetchQuizzesCompleted = async () => {
+    try {
+      const response = await api.get('/quizzes/count');
+      setTotalQuizzesCompleted(response.data.count || 0);
+    } catch (error) {
+      console.error('Error fetching quiz count:', error);
+      setTotalQuizzesCompleted(0);
     }
   };
 
@@ -271,6 +283,13 @@ const Dashboard = () => {
             <p className="text-xs font-medium text-gray-600 truncate">⏱️ Study</p>
             <p className="text-lg sm:text-3xl font-bold text-gray-900 mt-0.5 sm:mt-2">{formatStudyTime(liveStudyTime)}</p>
             <p className="text-xs text-gray-500 mt-0.5">today</p>
+          </div>
+
+          {/* Total Quizzes Completed */}
+          <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-2 sm:p-4 border-t-4 border-green-500">
+            <p className="text-xs font-medium text-gray-600 truncate">📋 Quizzes</p>
+            <p className="text-lg sm:text-3xl font-bold text-gray-900 mt-0.5 sm:mt-2">{totalQuizzesCompleted}</p>
+            <p className="text-xs text-gray-500 mt-0.5">completed</p>
           </div>
         </div>
 
