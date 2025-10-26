@@ -29,6 +29,8 @@ const Dashboard = () => {
   useEffect(() => {
     if (isAuthenticated && refreshUser) {
       fetchDecks();
+      // Only fetch quiz count if the API endpoint is available
+      // This prevents repeated 404 errors
       fetchQuizCount();
       refreshUser();
     }
@@ -142,14 +144,14 @@ const Dashboard = () => {
     }
   };
 
-  // Fetch quiz count
+  // Fetch quiz count (only try once to avoid spam)
   const fetchQuizCount = async () => {
     try {
       const response = await api.get('/quizzes/count');
       setQuizCount(response.data.count || 0);
     } catch (error) {
-      console.error('Error fetching quiz count:', error);
-      // Set to 0 if there's an error - don't spam the console
+      // Silently fail - quiz count is optional feature
+      // Set to 0 and don't retry
       setQuizCount(0);
     }
   };
