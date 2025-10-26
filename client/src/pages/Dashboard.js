@@ -39,9 +39,11 @@ const Dashboard = () => {
     if (!user) return;
 
     const today = new Date().toDateString();
-    const storageKeySessionStart = 'dashboardSessionStart';
-    const storageKeyDate = 'studyDate';
-    const storageKeyLastLogin = 'lastStudyDate';
+    // Make localStorage keys user-specific by including user ID
+    const userId = user._id || user.id;
+    const storageKeySessionStart = `dashboardSessionStart_${userId}`;
+    const storageKeyDate = `studyDate_${userId}`;
+    const storageKeyLastLogin = `lastStudyDate_${userId}`;
 
     // Initialize localStorage on first load
     let sessionStartTime = localStorage.getItem(storageKeySessionStart);
