@@ -14,7 +14,6 @@ const {
   generateLongAnswerQuestions,
   askQuestion
 } = require('../controllers/deckController');
-const { getRecommendations } = require('../controllers/recommendationController');
 
 /**
  * Deck Routes
@@ -41,9 +40,6 @@ router.post('/', protect, uploadWrapper, createDeck);
 
 // Get all decks for current user
 router.get('/', protect, getDecks);
-
-// Get smart recommendations based on quiz performance (must come BEFORE /:id route)
-router.get('/recommendations', protect, getRecommendations);
 
 // Get single deck
 router.get('/:id', protect, getDeck);
